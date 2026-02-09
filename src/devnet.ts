@@ -23,9 +23,7 @@ export interface DevnetMixin {
   handleJsonRpc(method: string, params?: Record<string, unknown>): Promise<unknown>;
 }
 
-export function WithDevnet<T extends Constructor<RpcProvider>>(
-  Base: T,
-): Constructor<InstanceType<T> & DevnetMixin> {
+export function WithDevnet<T extends Constructor<RpcProvider>>(Base: T): Constructor<InstanceType<T> & DevnetMixin> {
   return class extends Base {
     get isDevnet() {
       return this.channel.nodeUrl.startsWith(devnetBaseUrl);

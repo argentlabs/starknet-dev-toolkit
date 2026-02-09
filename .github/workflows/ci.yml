@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main branch
+        uses: actions/checkout@v4
+
+      - name: Use correct node version
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.x"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install project
+        run: pnpm install --frozen-lockfile
+
+      - name: Check correct formatting
+        run: pnpm format
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main branch
+        uses: actions/checkout@v4
+
+      - name: Use correct node version
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.x"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install project
+        run: pnpm install --frozen-lockfile
+
+      - name: Check correct linting
+        run: pnpm lint
