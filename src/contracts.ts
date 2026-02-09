@@ -2,13 +2,14 @@ import * as crypto from "crypto";
 import * as fs from "fs";
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from "fs";
 import { dirname, resolve } from "path";
-import type { Abi, DeclareContractPayload, UniversalDetails } from "starknet";
+import type { Abi, DeclareContractPayload, RpcProvider, UniversalDetails } from "starknet";
 import { Contract, extractContractHashes } from "starknet";
 import { deployer } from "./accounts.js";
 import type { ContractWithPopulate } from "./contractTypes.js";
-import type { WithDevnet } from "./devnet.js";
+import type { DevnetMixin } from "./devnet.js";
 import { readJsonFile } from "./files.js";
 import { l1DataGasPrice, l1GasPrice, l2GasPrice } from "./gas.js";
+import type { Constructor } from "./types.js";
 
 export const contractsFolder = "./target/release/argent_";
 export const fixturesFolder = "./tests-integration/fixtures/argent_";
@@ -18,8 +19,24 @@ type ContractClassWithAbi = DeclareContractPayload["contract"] & { abi: Abi };
 type CasmClass = DeclareContractPayload["casm"];
 type CacheClassHashes = Record<string, { compiledClassHash: string | undefined; classHash: string }>;
 
-export const WithContracts = <T extends ReturnType<typeof WithDevnet>>(Base: T) =>
-  class extends Base {
+export interface ContractsMixin {
+  clearClassCache(): void;
+  restartDevnetAndClearClassCache(): Promise<void>;
+  declareLocalContract(contractName: string, wait?: boolean, folder?: string): Promise<string>;
+  declareFixtureContract(contractName: string, wait?: boolean): Promise<string>;
+  declareArtifactAccountContract(contractVersion: string, wait?: boolean): Promise<string>;
+  declareArtifactMultisigContract(contractVersion: string, wait?: boolean): Promise<string>;
+  loadContract<T extends ContractLike = Contract>(
+    contractAddress: string,
+    classHash?: string,
+  ): Promise<ContractWithClassHash<T>>;
+  declareAndDeployContract<T extends ContractLike = Contract>(contractName: string): Promise<ContractWithClassHash<T>>;
+}
+
+export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
+  Base: T,
+): Constructor<InstanceType<T> & ContractsMixin> {
+  return class extends Base {
     // Maps a contract name to its class hash to avoid redeclaring the same contract
     protected declaredContracts: Record<string, string> = {};
     // Holds the latest know class hashes for a given contract
@@ -147,7 +164,8 @@ export const WithContracts = <T extends ReturnType<typeof WithDevnet>>(Base: T) 
 
       return await this.loadContract<T>(contract_address, classHash);
     }
-  };
+  } as unknown as Constructor<InstanceType<T> & ContractsMixin>;
+}
 
 export type ContractLike = Contract | ContractWithPopulate<unknown>;
 

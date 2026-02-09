@@ -5,11 +5,28 @@ import type { Constructor } from "./types.js";
 
 const successStates = [TransactionFinalityStatus.ACCEPTED_ON_L1, TransactionFinalityStatus.ACCEPTED_ON_L2];
 
-export const WithReceipts = <T extends Constructor<RpcProvider>>(Base: T) =>
-  class extends Base {
+type WaitForTxOptions = Parameters<RpcProvider["waitForTransaction"]>[1];
+
+export interface ReceiptsMixin {
+  waitForTx(
+    execute: Promise<{ transaction_hash: string }> | { transaction_hash: string } | string,
+    options?: WaitForTxOptions,
+  ): Promise<GetTransactionReceiptResponse>;
+  ensureSuccess(
+    execute: Promise<{ transaction_hash: string }> | { transaction_hash: string },
+  ): Promise<TransactionReceipt>;
+  ensureAccepted(
+    execute: Promise<{ transaction_hash: string }> | { transaction_hash: string },
+  ): Promise<TransactionReceipt>;
+}
+
+export function WithReceipts<T extends Constructor<RpcProvider>>(
+  Base: T,
+): Constructor<InstanceType<T> & ReceiptsMixin> {
+  return class extends Base {
     async waitForTx(
       execute: Promise<{ transaction_hash: string }> | { transaction_hash: string } | string,
-      options = {},
+      options: WaitForTxOptions = {} as WaitForTxOptions,
     ): Promise<GetTransactionReceiptResponse> {
       let transactionHash: string;
       if (typeof execute === "string") {
@@ -40,4 +57,5 @@ export const WithReceipts = <T extends Constructor<RpcProvider>>(Base: T) =>
       });
       return receipt as TransactionReceipt;
     }
-  };
+  } as unknown as Constructor<InstanceType<T> & ReceiptsMixin>;
+}

@@ -5,14 +5,34 @@ import type { Constructor } from "./types.js";
 const dumpFolderPath = "./dump";
 export const devnetBaseUrl = "http://127.0.0.1:5050";
 
-export const WithDevnet = <T extends Constructor<RpcProvider>>(Base: T) =>
-  class extends Base {
+type WaitForTxOptions = Parameters<RpcProvider["waitForTransaction"]>[1];
+
+export interface DevnetMixin {
+  readonly isDevnet: boolean;
+  waitForTransaction(
+    transactionHash: string,
+    options?: WaitForTxOptions,
+  ): ReturnType<RpcProvider["waitForTransaction"]>;
+  mintEth(address: string, amount: number | bigint): Promise<void>;
+  mintStrk(address: string, amount: number | bigint): Promise<void>;
+  increaseTime(timeInSeconds: number | bigint): Promise<void>;
+  setTime(timeInSeconds: number | bigint): Promise<void>;
+  restart(): Promise<void>;
+  dump(): Promise<void>;
+  load(): Promise<void>;
+  handleJsonRpc(method: string, params?: Record<string, unknown>): Promise<unknown>;
+}
+
+export function WithDevnet<T extends Constructor<RpcProvider>>(
+  Base: T,
+): Constructor<InstanceType<T> & DevnetMixin> {
+  return class extends Base {
     get isDevnet() {
       return this.channel.nodeUrl.startsWith(devnetBaseUrl);
     }
 
     // Polls quickly for a local network
-    waitForTransaction(transactionHash: string, options = {}) {
+    waitForTransaction(transactionHash: string, options: WaitForTxOptions = {} as WaitForTxOptions) {
       const retryInterval = this.isDevnet ? 100 : 1000;
       return super.waitForTransaction(transactionHash, { retryInterval, ...options });
     }
@@ -45,7 +65,7 @@ export const WithDevnet = <T extends Constructor<RpcProvider>>(Base: T) =>
       await this.handleJsonRpc("devnet_load", { path: dumpFolderPath });
     }
 
-    async handleJsonRpc(method: string, params = {}) {
+    async handleJsonRpc(method: string, params: Record<string, unknown> = {}) {
       const body = {
         jsonrpc: "2.0",
         id: Number(generateRandomNumber()),
@@ -70,4 +90,5 @@ export const WithDevnet = <T extends Constructor<RpcProvider>>(Base: T) =>
 
       return json.result;
     }
-  };
+  } as unknown as Constructor<InstanceType<T> & DevnetMixin>;
+}

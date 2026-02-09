@@ -1,7 +1,6 @@
 {
   "name": "starknet-dev-toolkit",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "engines": {
     "node": "24.x",
@@ -9,11 +8,20 @@
   },
   "license": "ISC",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
   },
-  "files": ["src"],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "clean": "rm -rf dist",
+    "prepare": "pnpm build",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@noble/curves": "1.7.0",

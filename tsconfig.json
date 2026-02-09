@@ -8,7 +8,12 @@
     "target": "ES2024",
     "lib": ["es2024"],
     "verbatimModuleSyntax": true,
-    "noEmit": true
+    "outDir": "dist",
+    "rootDir": "src",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "inlineSources": true
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
