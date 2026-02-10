@@ -11,12 +11,14 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./browser-shims/*": "./browser-shims/*.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "browser-shims"
   ],
   "scripts": {
     "build": "tsc",

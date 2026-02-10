@@ -1,6 +1,5 @@
-import * as crypto from "crypto";
-import * as fs from "fs";
-import { existsSync, mkdirSync, readdirSync, writeFileSync } from "fs";
+import { createHash } from "crypto";
+import { createReadStream, existsSync, mkdirSync, readdirSync, writeFileSync } from "fs";
 import { dirname, resolve } from "path";
 import type { Abi, DeclareContractPayload, RpcProvider, UniversalDetails } from "starknet";
 import { Contract, extractContractHashes } from "starknet";
@@ -207,8 +206,8 @@ function getSubfolders(dirPath: string): string[] {
 
 // This has to be fast. We don't care much about collisions
 async function hashFileFast(filePath: string): Promise<string> {
-  const hash = crypto.createHash("md5");
-  const stream = fs.createReadStream(filePath);
+  const hash = createHash("md5");
+  const stream = createReadStream(filePath);
 
   for await (const chunk of stream as AsyncIterable<Buffer>) {
     hash.update(chunk);

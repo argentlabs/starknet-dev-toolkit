@@ -26,7 +26,12 @@ export interface DevnetMixin {
 export function WithDevnet<T extends Constructor<RpcProvider>>(Base: T): Constructor<InstanceType<T> & DevnetMixin> {
   return class extends Base {
     get isDevnet() {
-      return this.channel.nodeUrl.startsWith(devnetBaseUrl);
+      try {
+        const url = new URL(this.channel.nodeUrl);
+        return url.hostname === "localhost" || url.hostname === "127.0.0.1";
+      } catch {
+        return false;
+      }
     }
 
     // Polls quickly for a local network

@@ -1,11 +1,9 @@
-import dotenv from "dotenv";
 import { RpcProvider } from "starknet";
 import { WithContracts } from "./contracts.js";
 import { WithDevnet, devnetBaseUrl } from "./devnet.js";
+import { getEnv } from "./env.js";
 import { WithReceipts } from "./receipts.js";
 import { TokenManager } from "./tokens.js";
-// This needs to be done here where we are actually using the env. Do not move this without testing
-dotenv.config({ override: true });
 
 export class Manager extends WithReceipts(WithContracts(WithDevnet(RpcProvider))) {
   tokens: TokenManager;
@@ -20,14 +18,31 @@ export class Manager extends WithReceipts(WithContracts(WithDevnet(RpcProvider))
   }
 }
 
-// Check that process.env.RPC_URL is set and that it is allowed to be used
-// Mostly done to prevent accidentally using the wrong network
-if (process.env.RPC_URL && !process.argv.includes(`--allow-rpc-url-env`)) {
-  console.log("When using RPC_URL, you must pass --allow-rpc-url-env");
-  process.exit(1);
+let managerInstance: Manager | undefined;
+
+function getManager(): Manager {
+  if (!managerInstance) {
+    const env = getEnv();
+    if (env.nodeUrl !== devnetBaseUrl && !env.allowRpcUrlEnv) {
+      console.log("When using a custom RPC URL, you must set allowRpcUrlEnv: true or pass --allow-rpc-url-env");
+      if (typeof process !== "undefined" && process.exit) {
+        process.exit(1);
+      }
+    }
+    managerInstance = new Manager(env.nodeUrl);
+    console.log("Provider:", managerInstance.channel.nodeUrl);
+    void managerInstance.channel.getSpecVersion().then((v) => console.log("RPC version:", v));
+  }
+  return managerInstance;
 }
 
-export const manager = new Manager(process.env.RPC_URL || `${devnetBaseUrl}`);
-
-console.log("Provider:", manager.channel.nodeUrl);
-console.log("RPC version:", await manager.channel.getSpecVersion());
+export const manager = new Proxy({} as Manager, {
+  get(_target, prop) {
+    const m = getManager();
+    const value = (m as unknown as Record<string, unknown>)[prop as string];
+    return typeof value === "function" ? (value as (...args: unknown[]) => unknown).bind(m) : value;
+  },
+  has(_target, prop) {
+    return prop in getManager();
+  },
+});

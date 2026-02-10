@@ -28,6 +28,7 @@ import {
   uint256,
 } from "starknet";
 import type { ArgentAccountContract } from "./contractTypes.js";
+import { getEnv } from "./env.js";
 import { manager } from "./manager.js";
 import { getOutsideExecutionCall } from "./outsideExecution.js";
 import type { LegacyKeyPair } from "./signers/legacy.js";
@@ -132,10 +133,11 @@ export function getDeployer(): Account {
       transactionVersion: ETransactionVersion.V3,
     });
   } else {
-    const address = process.env.ADDRESS;
-    const privateKey = process.env.PRIVATE_KEY;
+    const { deployerAddress: address, deployerPrivateKey: privateKey } = getEnv();
     if (!address || !privateKey) {
-      throw new Error("Missing deployer address or private key, please set ADDRESS and PRIVATE_KEY env variables.");
+      throw new Error(
+        "Missing deployer credentials. Set deployerAddress/deployerPrivateKey via setEnvProvider, or ADDRESS/PRIVATE_KEY in Node.",
+      );
     }
     cachedDeployer = new Account({
       provider: manager,
@@ -158,6 +160,9 @@ export const deployer = new Proxy<Account>({} as Account, {
       return value.bind(current);
     }
     return value;
+  },
+  has(_target, prop) {
+    return prop in getDeployer();
   },
 });
 

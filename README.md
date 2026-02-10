@@ -6,6 +6,21 @@ This library exists to support smart contract developers working on our
 contracts and tests. It is not intended for dapp usage or third-party
 integration, and we do not provide support or encourage external adoption.
 
+## Web / browser
+
+Not fully supported but some things might work. Call `setEnvProvider(() => ({ nodeUrl: "...", allowRpcUrlEnv: true, ... }))` before using the toolkit to override loading the secrets using dotenv.
+
+For Vite (and similar bundlers), alias Node built-ins to the toolkit’s browser shims so the bundle resolves `fs`, `path`, `crypto`, `child_process`:
+
+```ts
+import { getNodeShimAliases } from "starknet-dev-toolkit/browser-shims/alias";
+
+export default defineConfig({
+  resolve: { alias: getNodeShimAliases() },
+  // ...
+});
+```
+
 ## Consume the library
 
 Install from a git tag (no registry):

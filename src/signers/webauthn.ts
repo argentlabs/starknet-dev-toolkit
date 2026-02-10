@@ -7,15 +7,16 @@ import { CairoCustomEnum, CallData, hash, shortString, uint256 } from "starknet"
 import { normalizeSecpR1Signature } from "./secp256.js";
 import { ESTIMATE_PRIVATE_KEY, KeyPair, SignerType, signerTypeToCustomEnum } from "./signers.js";
 
-const buf2hex = (buffer: Uint8Array, prefix = true) =>
+const buf2hex = (buffer: Uint8Array, prefix = true): string =>
   `${prefix ? "0x" : ""}${[...buffer].map((x) => x.toString(16).padStart(2, "0")).join("")}`;
 
-const normalizeTransactionHash = (transactionHash: string) => transactionHash.replace(/^0x/, "").padStart(64, "0");
+export const normalizeTransactionHash = (transactionHash: string): string =>
+  transactionHash.replace(/^0x/, "").padStart(64, "0");
 
-const buf2base64url = (buffer: Uint8Array) =>
+const buf2base64url = (buffer: Uint8Array): string =>
   buf2base64(buffer).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 
-const buf2base64 = (buffer: Uint8Array) => btoa(String.fromCharCode(...buffer));
+const buf2base64 = (buffer: Uint8Array): string => btoa(String.fromCharCode(...buffer));
 
 const hex2buf = (hex: string) =>
   Uint8Array.from(
@@ -40,7 +41,8 @@ function numberToBytes(input: number): [number, number, number, number] {
   return bytes as [number, number, number, number];
 }
 
-const toCharArray = (value: string) => CallData.compile(value.split("").map(shortString.encodeShortString));
+export const toCharArray = (value: string): BigNumberish[] =>
+  CallData.compile(value.split("").map(shortString.encodeShortString));
 
 interface WebauthnSigner {
   origin: BigNumberish[];

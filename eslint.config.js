@@ -5,7 +5,7 @@ import tseslint from "typescript-eslint";
 
 export default defineConfig([
   {
-    ignores: ["dist", "examples", "node_modules", "eslint.config.js"],
+    ignores: ["dist", "examples", "node_modules", "eslint.config.js", "browser-shims"],
   },
   // 1. Base JS Rules
   js.configs.recommended,
