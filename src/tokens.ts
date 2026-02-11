@@ -41,11 +41,11 @@ export class TokenManager {
 
   async ethBalance(accountAddress: string): Promise<bigint> {
     const ethContract = await this.ethContract();
-    return await ethContract.balanceOf(accountAddress);
+    return await ethContract.balance_of(accountAddress);
   }
 
   async strkBalance(accountAddress: string): Promise<bigint> {
     const strkContract = await this.strkContract();
-    return await strkContract.balanceOf(accountAddress);
+    return await strkContract.balance_of(accountAddress);
   }
 }
