@@ -52,7 +52,8 @@ export type MockDappContract = ContractWithPopulate<{
 }>;
 
 export type Erc20Contract = ContractWithPopulate<{
-  balanceOf: (accountAddress: string) => Promise<bigint>;
+  balance_of: (accountAddress: string) => Promise<bigint>;
+  approve: (spender: string, amount: BigNumberish | Uint256) => Promise<InvokeFunctionResponse>;
   transfer: (recipient: string, amount: BigNumberish | Uint256) => Promise<InvokeFunctionResponse>;
 }>;
 
