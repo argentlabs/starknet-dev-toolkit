@@ -101,7 +101,10 @@ type DevnetAccountPayload = {
   private_key: string;
 };
 
-export async function getPredeployedDevnetAccount(provider: DevnetMixin, excludeAddress?: string): Promise<{ address: string; privateKey: string }> {
+export async function getPredeployedDevnetAccount(
+  provider: DevnetMixin,
+  excludeAddress?: string,
+): Promise<{ address: string; privateKey: string }> {
   if (provider.isDevnet === false) {
     throw new Error("Predeployed account lookup requires devnet");
   }
