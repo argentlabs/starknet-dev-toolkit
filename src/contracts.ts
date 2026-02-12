@@ -1,7 +1,13 @@
 import { createHash } from "crypto";
 import { createReadStream, existsSync, mkdirSync, readdirSync, writeFileSync } from "fs";
 import { dirname, resolve } from "path";
-import type { Abi, DeclareContractPayload, RpcProvider, UniversalDetails } from "starknet";
+import type {
+  Abi,
+  DeclareContractPayload,
+  RpcProvider,
+  UniversalDeployerContractPayload,
+  UniversalDetails,
+} from "starknet";
 import { Contract, extractContractHashes } from "starknet";
 import { deployer } from "./accounts.js";
 import type { ContractWithPopulate } from "./contractTypes.js";
@@ -30,6 +36,13 @@ export interface ContractsMixin {
     classHash?: string,
   ): Promise<ContractWithClassHash<T>>;
   declareAndDeployContract<T extends ContractLike = Contract>(contractName: string): Promise<ContractWithClassHash<T>>;
+  // TODO This can prob be merged with the one above
+  deployContract<T extends ContractLike = Contract>(
+    contractName: string,
+    payload: Omit<UniversalDeployerContractPayload, "classHash"> | UniversalDeployerContractPayload[],
+    details?: UniversalDetails,
+    folder?: string,
+  ): Promise<ContractWithClassHash<T>>;
 }
 
 export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
@@ -163,6 +176,19 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
       const classHash = await this.declareLocalContract(contractName, true, contractsFolder);
       const { contract_address } = await deployer.deployContract({ classHash });
 
+      return await this.loadContract<T>(contract_address, classHash);
+    }
+
+    async deployContract<T extends ContractLike = Contract>(
+      contractName: string,
+      payload: Omit<UniversalDeployerContractPayload, "classHash"> | UniversalDeployerContractPayload[],
+      details?: UniversalDetails,
+      folder = contractsFolder,
+    ): Promise<ContractWithClassHash<T>> {
+      const classHash = await this.declareLocalContract(contractName, true, folder);
+      const { contract_address } = await deployer.deployContract({ ...payload, classHash }, details);
+
+      // TODO could avoid network request and just create the contract using the ABI
       return await this.loadContract<T>(contract_address, classHash);
     }
   } as unknown as Constructor<InstanceType<T> & ContractsMixin>;
