@@ -103,7 +103,7 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
         this.cacheClassHashes = readJsonFile<CacheClassHashes>(cacheClassHashFilepath);
       }
 
-      const contractClassPath = resolveContractFile(contractName, folder, ".contract_class.json");
+      const contractClassPath = resolveContractFile(contractName, folder);
       const fileHash = await hashFileFast(contractClassPath);
       // If the contract is not in the cache, extract the class hash and add it to the cache
       if (!this.cacheClassHashes[fileHash]) {
@@ -202,7 +202,7 @@ export function getDeclareContractPayload(
   contractName: string,
   folder = contractsFolder,
 ): DeclareContractPayload & { contract: ContractClassWithAbi } {
-  const classFilePath = resolveContractFile(contractName, folder, ".contract_class.json");
+  const classFilePath = resolveContractFile(contractName, folder);
   const contract = readJsonFile<ContractClassWithAbi>(classFilePath);
   const casmFilePath = classFilePath.replace(".contract_class.json", ".compiled_contract_class.json");
   if (existsSync(casmFilePath)) {
@@ -234,27 +234,21 @@ function getSubfolders(dirPath: string): string[] {
   }
 }
 
-/**
- * Finds a contract file in a folder by scanning for a file ending with
- * `${contractName}${suffix}`. This avoids hardcoding a repo-specific prefix
- * (e.g. "argent_") into the toolkit.
- *
- * If the direct path `folder/contractName+suffix` exists (artifact subfolders),
- * it's returned immediately without scanning.
- */
-function resolveContractFile(contractName: string, folder: string, suffix: string): string {
-  const directPath = resolve(folder, `${contractName}${suffix}`);
-  if (existsSync(directPath)) {
-    return directPath;
+function resolveContractFile(contractName: string, folder: string): string {
+  if (contractName.includes("..") || contractName.includes("/")) {
+    throw new Error(`Invalid contract name: "${contractName}"`);
   }
-  const dir = dirname(directPath);
-  const target = `${contractName}${suffix}`;
-  const files = readdirSync(dir);
+  if (folder.includes("..")) {
+    throw new Error(`Invalid folder: "${folder}"`);
+  }
+  const target = `_${contractName}.contract_class.json`;
+  const absoluteDir = resolve(folder);
+  const files = readdirSync(absoluteDir);
   const match = files.find((f) => f.endsWith(target));
   if (!match) {
-    throw new Error(`No file matching "*${target}" found in ${dir}`);
+    throw new Error(`No file matching "*${target}" found in ${absoluteDir}`);
   }
-  return resolve(dir, match);
+  return resolve(absoluteDir, match);
 }
 
 // This has to be fast. We don't care much about collisions
