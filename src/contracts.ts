@@ -236,12 +236,6 @@ function getSubfolders(dirPath: string): string[] {
 }
 
 function resolveContractFile(contractName: string, folder: string): string {
-  if (contractName.includes("..") || contractName.includes("/")) {
-    throw new Error(`Invalid contract name: "${contractName}"`);
-  }
-  if (folder.includes("..")) {
-    throw new Error(`Invalid folder: "${folder}"`);
-  }
   const target = `_${contractName}.contract_class.json`;
   const absoluteDir = resolve(folder);
   const files = readdirSync(absoluteDir);
