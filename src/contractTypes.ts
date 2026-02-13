@@ -72,41 +72,48 @@ export type AccountEscapeState = {
   new_signer: CairoOption<{ stored_value: bigint }>;
 };
 
-export type ArgentAccountContract = ContractWithPopulate<{
+type ArgentBaseAccountMethods = {
   __validate__: (calldata: RawCalldata) => Promise<InvokeFunctionResponse>;
-  change_owners: (calldata: RawCalldata) => Promise<InvokeFunctionResponse>;
-  change_guardians: (calldata: RawCalldata) => Promise<InvokeFunctionResponse>;
-  change_owner: (payload: RawCalldata | CairoOption<bigint> | BigNumberish) => Promise<InvokeFunctionResponse>;
-  revoke_session: (sessionHash: string) => Promise<InvokeFunctionResponse>;
-  is_session_revoked: (sessionHash: string) => Promise<boolean>;
-  is_session_authorization_cached: {
-    (sessionHash: string): Promise<boolean>;
-    (sessionHash: string, ownerGuid: bigint, guardianGuid: bigint): Promise<boolean>;
-  };
   get_outside_execution_message_hash_rev_0: (outsideExecution: unknown) => Promise<BigNumberish>;
   is_valid_outside_execution_nonce: (nonce: BigNumberish) => Promise<boolean>;
-  get_escape: () => Promise<AccountEscapeState>;
-  get_escape_and_status: () => Promise<[AccountEscapeState, CairoCustomEnum]>;
-  trigger_escape_owner: (payload: BigNumberish | RawCalldata | CairoOption<bigint>) => Promise<InvokeFunctionResponse>;
-  trigger_escape_guardian: (
-    payload: BigNumberish | RawCalldata | CairoOption<bigint>,
-  ) => Promise<InvokeFunctionResponse>;
-  escape_owner: () => Promise<InvokeFunctionResponse>;
-  escape_guardian: () => Promise<InvokeFunctionResponse>;
-  cancel_escape: () => Promise<InvokeFunctionResponse>;
-  set_escape_security_period: (seconds: number | bigint) => Promise<InvokeFunctionResponse>;
-  get_last_guardian_trigger_escape_attempt: () => Promise<bigint>;
-  get_last_owner_trigger_escape_attempt: () => Promise<bigint>;
-  get_last_guardian_escape_attempt: () => Promise<bigint>;
-  get_last_owner_escape_attempt: () => Promise<bigint>;
-  get_guardian: () => Promise<bigint>;
-  get_guardian_guid: () => Promise<CairoOption<bigint>>;
-  get_owner: () => Promise<bigint>;
-  get_owners_guids: () => Promise<bigint[]>;
-  get_guardians_guids: () => Promise<bigint[]>;
-  is_owner_guid: (guid: bigint) => Promise<boolean>;
+  is_valid_signature: (hash: BigNumberish, signature: BigNumberish[]) => Promise<bigint>;
   get_name: () => Promise<bigint>;
-}>;
+  get_version: () => Promise<{ major: bigint; minor: bigint; patch: bigint }>;
+};
+
+export type ArgentAccountContract = ContractWithPopulate<
+  ArgentBaseAccountMethods & {
+    change_owners: (calldata: RawCalldata) => Promise<InvokeFunctionResponse>;
+    change_guardians: (calldata: RawCalldata) => Promise<InvokeFunctionResponse>;
+    change_owner: (payload: RawCalldata | CairoOption<bigint> | BigNumberish) => Promise<InvokeFunctionResponse>;
+    revoke_session: (sessionHash: string) => Promise<InvokeFunctionResponse>;
+    is_session_revoked: (sessionHash: string) => Promise<boolean>;
+    is_session_authorization_cached: {
+      (sessionHash: string): Promise<boolean>;
+      (sessionHash: string, ownerGuid: bigint, guardianGuid: bigint): Promise<boolean>;
+    };
+    get_escape: () => Promise<AccountEscapeState>;
+    get_escape_and_status: () => Promise<[AccountEscapeState, CairoCustomEnum]>;
+    trigger_escape_owner: (payload: BigNumberish | RawCalldata | CairoOption<bigint>) => Promise<InvokeFunctionResponse>;
+    trigger_escape_guardian: (
+      payload: BigNumberish | RawCalldata | CairoOption<bigint>,
+    ) => Promise<InvokeFunctionResponse>;
+    escape_owner: () => Promise<InvokeFunctionResponse>;
+    escape_guardian: () => Promise<InvokeFunctionResponse>;
+    cancel_escape: () => Promise<InvokeFunctionResponse>;
+    set_escape_security_period: (seconds: number | bigint) => Promise<InvokeFunctionResponse>;
+    get_last_guardian_trigger_escape_attempt: () => Promise<bigint>;
+    get_last_owner_trigger_escape_attempt: () => Promise<bigint>;
+    get_last_guardian_escape_attempt: () => Promise<bigint>;
+    get_last_owner_escape_attempt: () => Promise<bigint>;
+    get_guardian: () => Promise<bigint>;
+    get_guardian_guid: () => Promise<CairoOption<bigint>>;
+    get_owner: () => Promise<bigint>;
+    get_owners_guids: () => Promise<bigint[]>;
+    get_guardians_guids: () => Promise<bigint[]>;
+    is_owner_guid: (guid: bigint) => Promise<boolean>;
+  }
+>;
 
 export type MultisigEscapeStatus = CairoCustomEnum & {
   variant: {
@@ -127,22 +134,19 @@ export type MultisigEscapeResponse = {
   "1": MultisigEscapeStatus;
 };
 
-export type ArgentMultisigContract = ContractWithPopulate<{
-  __validate__: (calldata: RawCalldata) => Promise<InvokeFunctionResponse>;
-  get_outside_execution_message_hash_rev_0: (outsideExecution: unknown) => Promise<BigNumberish>;
-  is_valid_outside_execution_nonce: (nonce: BigNumberish) => Promise<boolean>;
-  get_threshold: () => Promise<bigint>;
-  get_name: () => Promise<bigint>;
-  get_version: () => Promise<{ major: bigint; minor: bigint; patch: bigint }>;
-  is_signer_guid: (guid: bigint) => Promise<boolean>;
-  get_signer_guids: () => Promise<bigint[]>;
-  is_signer: (signer: BigNumberish | Calldata) => Promise<boolean>;
-  add_signers: (calldata: RawCalldata) => Promise<InvokeFunctionResponse>;
-  replace_signer: (calldata: RawCalldata) => Promise<InvokeFunctionResponse>;
-  remove_signers: (calldata: RawCalldata) => Promise<InvokeFunctionResponse>;
-  toggle_escape: (calldata: RawCalldata) => Promise<InvokeFunctionResponse>;
-  trigger_escape: (calldata: RawCalldata) => Promise<InvokeFunctionResponse>;
-  execute_escape: (calldata: RawCalldata) => Promise<InvokeFunctionResponse>;
-  change_threshold: (newThreshold: bigint) => Promise<InvokeFunctionResponse>;
-  get_escape: () => Promise<MultisigEscapeResponse>;
-}>;
+export type ArgentMultisigContract = ContractWithPopulate<
+  ArgentBaseAccountMethods & {
+    get_threshold: () => Promise<bigint>;
+    is_signer_guid: (guid: bigint) => Promise<boolean>;
+    get_signer_guids: () => Promise<bigint[]>;
+    is_signer: (signer: BigNumberish | Calldata) => Promise<boolean>;
+    add_signers: (calldata: RawCalldata) => Promise<InvokeFunctionResponse>;
+    replace_signer: (calldata: RawCalldata) => Promise<InvokeFunctionResponse>;
+    remove_signers: (calldata: RawCalldata) => Promise<InvokeFunctionResponse>;
+    toggle_escape: (calldata: RawCalldata) => Promise<InvokeFunctionResponse>;
+    trigger_escape: (calldata: RawCalldata) => Promise<InvokeFunctionResponse>;
+    execute_escape: (calldata: RawCalldata) => Promise<InvokeFunctionResponse>;
+    change_threshold: (newThreshold: bigint) => Promise<InvokeFunctionResponse>;
+    get_escape: () => Promise<MultisigEscapeResponse>;
+  }
+>;
