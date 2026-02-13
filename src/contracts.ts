@@ -1,6 +1,6 @@
 import { createHash } from "crypto";
 import { createReadStream, existsSync, mkdirSync, readdirSync, writeFileSync } from "fs";
-import { dirname, resolve } from "path";
+import { dirname, join, resolve } from "path";
 import type {
   Abi,
   DeclareContractPayload,
@@ -233,9 +233,7 @@ function getSubfolders(dirPath: string): string[] {
 function resolveContractFile(contractName: string, folder: string): string {
   // Todo find a fix for files that should start with _
   const suffix = ".contract_class.json";
-
-  // Direct path (used by artifact subfolders like "deployments/artifacts/<version>/ArgentAccount")
-  const directPath = resolve(folder, `${contractName}${suffix}`);
+  const directPath = join(folder, `${contractName}${suffix}`);
   if (existsSync(directPath)) {
     return directPath;
   }
