@@ -231,8 +231,17 @@ function getSubfolders(dirPath: string): string[] {
 }
 
 function resolveContractFile(contractName: string, folder: string): string {
-  // TODO Find a fix for files that should start with _
-  const target = `${contractName}.contract_class.json`;
+  // Todo find a fix for files that should start with _
+  const suffix = ".contract_class.json";
+
+  // Direct path (used by artifact subfolders like "deployments/artifacts/<version>/ArgentAccount")
+  const directPath = resolve(folder, `${contractName}${suffix}`);
+  if (existsSync(directPath)) {
+    return directPath;
+  }
+
+  // Scan for prefixed files (e.g. "argent_Token.contract_class.json" when contractName is "Token")
+  const target = `${contractName}${suffix}`;
   const absoluteDir = resolve(folder);
   const files = readdirSync(absoluteDir);
   const match = files.find((f) => f.endsWith(target));
