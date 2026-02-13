@@ -94,7 +94,9 @@ export type ArgentAccountContract = ContractWithPopulate<
     };
     get_escape: () => Promise<AccountEscapeState>;
     get_escape_and_status: () => Promise<[AccountEscapeState, CairoCustomEnum]>;
-    trigger_escape_owner: (payload: BigNumberish | RawCalldata | CairoOption<bigint>) => Promise<InvokeFunctionResponse>;
+    trigger_escape_owner: (
+      payload: BigNumberish | RawCalldata | CairoOption<bigint>,
+    ) => Promise<InvokeFunctionResponse>;
     trigger_escape_guardian: (
       payload: BigNumberish | RawCalldata | CairoOption<bigint>,
     ) => Promise<InvokeFunctionResponse>;
