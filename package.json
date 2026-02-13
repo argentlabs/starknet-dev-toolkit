@@ -32,13 +32,13 @@
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
-    "ethers": "6.16.0",
     "@noble/curves": "1.7.0",
-    "starknet": "9.2.1",
     "chai": "5.1.1",
     "chai-as-promised": "8.0.2",
     "dotenv": "17.2.3",
-    "lodash-es": "4.17.23"
+    "ethers": "6.16.0",
+    "lodash-es": "4.17.23",
+    "starknet": "9.2.1"
   },
   "peerDependenciesMeta": {
     "ethers": {
@@ -62,5 +62,5 @@
     "typescript": "5.9.3",
     "typescript-eslint": "8.54.0"
   },
-  "packageManager": "pnpm@10.29.2+sha512.bef43fa759d91fd2da4b319a5a0d13ef7a45bb985a3d7342058470f9d2051a3ba8674e629672654686ef9443ad13a82da2beb9eeb3e0221c87b8154fff9d74b8"
+  "packageManager": "pnpm@10.29.3"
 }

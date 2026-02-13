@@ -105,6 +105,7 @@ export type ArgentAccountContract = ContractWithPopulate<{
   get_owners_guids: () => Promise<bigint[]>;
   get_guardians_guids: () => Promise<bigint[]>;
   is_owner_guid: (guid: bigint) => Promise<boolean>;
+  get_name: () => Promise<bigint>;
 }>;
 
 export type MultisigEscapeStatus = CairoCustomEnum & {
