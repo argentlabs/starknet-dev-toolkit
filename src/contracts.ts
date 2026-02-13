@@ -148,7 +148,7 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
       if (!contractName) {
         throw new Error(`No contract found for version ${contractVersion}`);
       }
-      contractName = `${contractName}/ArgentAccount`;
+      contractName = `/${contractName}/ArgentAccount`;
       return await this.declareLocalContract(contractName, wait, artifactsFolder);
     }
 
@@ -158,7 +158,7 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
       if (!contractName) {
         throw new Error(`No contract found for version ${contractVersion}`);
       }
-      contractName = `${contractName}/ArgentMultisig`;
+      contractName = `/${contractName}/ArgentMultisig`;
       return await this.declareLocalContract(contractName, wait, artifactsFolder);
     }
 
