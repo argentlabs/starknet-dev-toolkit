@@ -80,7 +80,17 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
         return cachedClass;
       }
 
-      const payload = getDeclareContractPayload(contractName, folder);
+      const contractClassPath = resolveContractFile(contractName, folder);
+      const contract = readJsonFile<ContractClassWithAbi>(contractClassPath);
+      const casmFilePath = contractClassPath.replace(".contract_class.json", ".compiled_contract_class.json");
+      let payload: DeclareContractPayload & { contract: ContractClassWithAbi };
+      if (existsSync(casmFilePath)) {
+        const casm = readJsonFile<CasmClass>(casmFilePath);
+        payload = { contract, casm } as DeclareContractPayload & { contract: ContractClassWithAbi };
+      } else {
+        payload = { contract } as DeclareContractPayload & { contract: ContractClassWithAbi };
+      }
+
       let details: UniversalDetails | undefined;
       // Setting resourceBounds skips estimate
       if (this.isDevnet) {
@@ -104,7 +114,6 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
         this.cacheClassHashes = readJsonFile<CacheClassHashes>(cacheClassHashFilepath);
       }
 
-      const contractClassPath = resolveContractFile(contractName, folder);
       const fileHash = await hashFileFast(contractClassPath);
       // If the contract is not in the cache, extract the class hash and add it to the cache
       if (!this.cacheClassHashes[fileHash]) {
@@ -199,20 +208,6 @@ export type ContractLike = Contract | ContractWithPopulate<unknown>;
 
 export type ContractWithClassHash<T extends ContractLike = Contract> = T & { classHash: string };
 
-export function getDeclareContractPayload(
-  contractName: string,
-  folder = contractsFolder,
-): DeclareContractPayload & { contract: ContractClassWithAbi } {
-  const classFilePath = resolveContractFile(contractName, folder);
-  const contract = readJsonFile<ContractClassWithAbi>(classFilePath);
-  const casmFilePath = classFilePath.replace(".contract_class.json", ".compiled_contract_class.json");
-  if (existsSync(casmFilePath)) {
-    const casm = readJsonFile<CasmClass>(casmFilePath);
-    return { contract, casm } as DeclareContractPayload & { contract: ContractClassWithAbi };
-  }
-  return { contract } as DeclareContractPayload & { contract: ContractClassWithAbi };
-}
-
 /**
  * Get all subfolders in a directory.
  * @param dirPath The directory path to search.
@@ -236,7 +231,8 @@ function getSubfolders(dirPath: string): string[] {
 }
 
 function resolveContractFile(contractName: string, folder: string): string {
-  const target = `_${contractName}.contract_class.json`;
+  // TODO Find a fix for files that should start with _
+  const target = `${contractName}.contract_class.json`;
   const absoluteDir = resolve(folder);
   const files = readdirSync(absoluteDir);
   const match = files.find((f) => f.endsWith(target));
