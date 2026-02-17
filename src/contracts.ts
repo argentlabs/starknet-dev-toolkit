@@ -16,8 +16,8 @@ import { readJsonFile } from "./files.js";
 import { l1DataGasPrice, l1GasPrice, l2GasPrice } from "./gas.js";
 import type { Constructor } from "./types.js";
 
-export const contractsFolder = "./target/release";
-export const fixturesFolder = "./tests-integration/fixtures/argent_";
+const contractsFolder = "./target/release";
+const fixturesFolder = "./tests-integration/fixtures/argent_";
 const artifactsFolder = "./deployments/artifacts";
 const cacheClassHashFilepath = "./dist/classHashCache.json";
 type ContractClassWithAbi = DeclareContractPayload["contract"] & { abi: Abi };
@@ -27,7 +27,7 @@ type CacheClassHashes = Record<string, { compiledClassHash: string | undefined; 
 export interface ContractsMixin {
   clearClassCache(): void;
   restartDevnetAndClearClassCache(): Promise<void>;
-  declareLocalContract(contractName: string, wait?: boolean, folder?: string): Promise<string>;
+  declareLocalContract(contractName: string, wait?: boolean): Promise<string>;
   declareFixtureContract(contractName: string, wait?: boolean): Promise<string>;
   // TODO make it an enum
   declareArtifactAccountContract(contractVersion: string, wait?: boolean): Promise<string>;
@@ -36,14 +36,9 @@ export interface ContractsMixin {
     contractAddress: string,
     classHash?: string,
   ): Promise<ContractWithClassHash<T>>;
-  declareAndDeployContract<T extends ContractLike = Contract>(contractName: string): Promise<ContractWithClassHash<T>>;
-  // TODO This can prob be merged with the one above
-  deployContract<T extends ContractLike = Contract>(
-    contractName: string,
+  declareAndDeployContract<T extends ContractLike = Contract>(contractName: string, 
     payload: Omit<UniversalDeployerContractPayload, "classHash"> | UniversalDeployerContractPayload[],
-    details?: UniversalDetails,
-    folder?: string,
-  ): Promise<ContractWithClassHash<T>>;
+    details?: UniversalDetails): Promise<ContractWithClassHash<T>>;
 }
 
 export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
@@ -182,20 +177,10 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
 
     async declareAndDeployContract<T extends ContractLike = Contract>(
       contractName: string,
-    ): Promise<ContractWithClassHash<T>> {
-      const classHash = await this.declareLocalContract(contractName, true, contractsFolder);
-      const { contract_address } = await deployer.deployContract({ classHash });
-
-      return await this.loadContract<T>(contract_address, classHash);
-    }
-
-    async deployContract<T extends ContractLike = Contract>(
-      contractName: string,
       payload: Omit<UniversalDeployerContractPayload, "classHash"> | UniversalDeployerContractPayload[],
       details?: UniversalDetails,
-      folder = contractsFolder,
     ): Promise<ContractWithClassHash<T>> {
-      const classHash = await this.declareLocalContract(contractName, true, folder);
+      const classHash = await this.declareLocalContract(contractName, true, contractsFolder);
       const { contract_address } = await deployer.deployContract({ ...payload, classHash }, details);
 
       // TODO could avoid network request and just create the contract using the ABI
