@@ -38,7 +38,7 @@ export interface ContractsMixin {
   ): Promise<ContractWithClassHash<T>>;
   declareAndDeployContract<T extends ContractLike = Contract>(
     contractName: string,
-    payload: Omit<UniversalDeployerContractPayload, "classHash"> | UniversalDeployerContractPayload[],
+    payload?: Omit<UniversalDeployerContractPayload, "classHash"> | UniversalDeployerContractPayload[],
     details?: UniversalDetails,
   ): Promise<ContractWithClassHash<T>>;
 }
@@ -179,7 +179,7 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
 
     async declareAndDeployContract<T extends ContractLike = Contract>(
       contractName: string,
-      payload: Omit<UniversalDeployerContractPayload, "classHash"> | UniversalDeployerContractPayload[],
+      payload?: Omit<UniversalDeployerContractPayload, "classHash"> | UniversalDeployerContractPayload[],
       details?: UniversalDetails,
     ): Promise<ContractWithClassHash<T>> {
       const classHash = await this.declareLocalContract(contractName, true, contractsFolder);
