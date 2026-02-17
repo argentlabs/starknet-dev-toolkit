@@ -36,9 +36,11 @@ export interface ContractsMixin {
     contractAddress: string,
     classHash?: string,
   ): Promise<ContractWithClassHash<T>>;
-  declareAndDeployContract<T extends ContractLike = Contract>(contractName: string, 
+  declareAndDeployContract<T extends ContractLike = Contract>(
+    contractName: string,
     payload: Omit<UniversalDeployerContractPayload, "classHash"> | UniversalDeployerContractPayload[],
-    details?: UniversalDetails): Promise<ContractWithClassHash<T>>;
+    details?: UniversalDetails,
+  ): Promise<ContractWithClassHash<T>>;
 }
 
 export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
