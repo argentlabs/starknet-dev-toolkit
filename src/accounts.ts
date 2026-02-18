@@ -94,7 +94,7 @@ class ArgentWallet implements ArgentWallet {
       transactionHash: string;
     },
   ): Promise<ArgentWallet> {
-    const accountContract = await manager.loadContract<ArgentAccountContract>(finalParams.account.address);
+    const accountContract: ArgentAccountContract = await manager.loadContract(finalParams.account.address);
     accountContract.providerOrAccount = finalParams.account;
 
     return new ArgentWallet(
@@ -258,7 +258,7 @@ async function deployAccountInner(params: DeployAccountParams): Promise<ArgentWa
     const { transaction_hash } = await account.deploySelf({ classHash, constructorCalldata, addressSalt: salt });
     transactionHash = transaction_hash;
 
-    const accountContract = await manager.loadContract<ArgentAccountContract>(account.address);
+    const accountContract: ArgentAccountContract = await manager.loadContract(account.address);
     accountContract.providerOrAccount = account;
     if (finalParams.owners.length > 1) {
       const calldata = CallData.compile([
@@ -393,7 +393,7 @@ async function deployLegacyAccountInner(
   });
   await manager.waitForTx(transaction_hash);
 
-  const accountContract = await manager.loadContract<ArgentAccountContract>(account.address);
+  const accountContract: ArgentAccountContract = await manager.loadContract(account.address);
   accountContract.providerOrAccount = account;
   return { account, accountContract, owner, guardian };
 }

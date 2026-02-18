@@ -35,7 +35,7 @@ export class TokenManager {
     if (this.strkCache) {
       return this.strkCache;
     }
-    this.strkCache = await this.manager.loadContract<Erc20Contract>(strkAddress);
+    this.strkCache = await this.manager.loadContract(strkAddress);
     return this.strkCache;
   }
 

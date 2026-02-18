@@ -128,7 +128,7 @@ export class Session {
     cacheGuardianGuid?: bigint,
   ): Promise<boolean> {
     if (!cacheOwnerGuid || !cacheGuardianGuid) return false;
-    const sessionContract = await manager.loadContract<ArgentAccountContract>(accountAddress);
+    const sessionContract: ArgentAccountContract = await manager.loadContract(accountAddress);
     const sessionMessageHash = typedData.getMessageHash(await this.getTypedData(), accountAddress);
     if (this.legacyMode) {
       return await sessionContract.is_session_authorization_cached(sessionMessageHash);
