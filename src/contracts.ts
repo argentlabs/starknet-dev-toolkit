@@ -29,7 +29,6 @@ export interface ContractsMixin {
   restartDevnetAndClearClassCache(): Promise<void>;
   declareLocalContract(contractName: string, wait?: boolean): Promise<string>;
   declareFixtureContract(contractName: string, wait?: boolean): Promise<string>;
-  // TODO make it an enum
   declareArtifactAccountContract(contractVersion: string, wait?: boolean): Promise<string>;
   declareArtifactMultisigContract(contractVersion: string, wait?: boolean): Promise<string>;
   loadContract<T extends ContractLike = Contract>(

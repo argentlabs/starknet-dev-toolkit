@@ -31,22 +31,15 @@
     "prepare": "pnpm build",
     "typecheck": "tsc --noEmit"
   },
-  "peerDependencies": {
+  "dependencies": {
     "@noble/curves": "1.7.0",
+    "ethers": "6.16.0",
+    "lodash-es": "4.17.23"
+  },
+  "peerDependencies": {
     "chai": "5.1.1",
     "chai-as-promised": "8.0.2",
-    "dotenv": "17.2.3",
-    "ethers": "6.16.0",
-    "lodash-es": "4.17.23",
     "starknet": "9.2.1"
-  },
-  "peerDependenciesMeta": {
-    "ethers": {
-      "optional": true
-    },
-    "@noble/curves": {
-      "optional": true
-    }
   },
   "devDependencies": {
     "@eslint/js": "9.39.2",
