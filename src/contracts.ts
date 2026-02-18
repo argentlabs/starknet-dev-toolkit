@@ -3,6 +3,8 @@ import { createReadStream, existsSync, mkdirSync, readdirSync, writeFileSync } f
 import { dirname, join, resolve } from "path";
 import type {
   Abi,
+  CompiledContract,
+  CompiledSierraCasm,
   DeclareContractPayload,
   RpcProvider,
   UniversalDeployerContractPayload,
@@ -17,18 +19,14 @@ import { l1DataGasPrice, l1GasPrice, l2GasPrice } from "./gas.js";
 import type { Constructor } from "./types.js";
 
 const contractsFolder = "./target/release";
-const fixturesFolder = "./tests-integration/fixtures/argent_";
 const artifactsFolder = "./deployments/artifacts";
 const cacheClassHashFilepath = "./dist/classHashCache.json";
-type ContractClassWithAbi = DeclareContractPayload["contract"] & { abi: Abi };
-type CasmClass = DeclareContractPayload["casm"];
 type CacheClassHashes = Record<string, { compiledClassHash: string | undefined; classHash: string }>;
 
 export interface ContractsMixin {
   clearClassCache(): void;
   restartDevnetAndClearClassCache(): Promise<void>;
-  declareLocalContract(contractName: string, wait?: boolean): Promise<string>;
-  declareFixtureContract(contractName: string, wait?: boolean): Promise<string>;
+  declareLocalContract(contractName: string, wait?: boolean, folder?: string): Promise<string>;
   declareArtifactAccountContract(contractVersion: string, wait?: boolean): Promise<string>;
   declareArtifactMultisigContract(contractVersion: string, wait?: boolean): Promise<string>;
   loadContract<T extends ContractLike = Contract>(
@@ -69,7 +67,6 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
     }
 
     // Could extends Account to add our specific fn but that's too early.
-    // TODO Check if last arg is used in any library
     async declareLocalContract(contractName: string, wait = true, folder = contractsFolder): Promise<string> {
       const cachedClass = this.declaredContracts[contractName];
       if (cachedClass) {
@@ -77,14 +74,14 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
       }
 
       const contractClassPath = resolveContractFile(contractName, folder);
-      const contract = readJsonFile<ContractClassWithAbi>(contractClassPath);
+      const contract = readJsonFile<CompiledContract>(contractClassPath);
       const casmFilePath = contractClassPath.replace(".contract_class.json", ".compiled_contract_class.json");
-      let payload: DeclareContractPayload & { contract: ContractClassWithAbi };
+      let payload: DeclareContractPayload & { contract: CompiledContract };
       if (existsSync(casmFilePath)) {
-        const casm = readJsonFile<CasmClass>(casmFilePath);
-        payload = { contract, casm } as DeclareContractPayload & { contract: ContractClassWithAbi };
+        const casm = readJsonFile<CompiledSierraCasm>(casmFilePath);
+        payload = { contract, casm } as DeclareContractPayload & { contract: CompiledContract };
       } else {
-        payload = { contract } as DeclareContractPayload & { contract: ContractClassWithAbi };
+        payload = { contract } as DeclareContractPayload & { contract: CompiledContract };
       }
 
       let details: UniversalDetails | undefined;
@@ -132,10 +129,6 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
       this.declaredContracts[contractName] = class_hash;
       this.abiCache[class_hash] = payload.contract.abi;
       return class_hash;
-    }
-
-    async declareFixtureContract(contractName: string, wait = true): Promise<string> {
-      return await this.declareLocalContract(contractName, wait, fixturesFolder);
     }
 
     async declareArtifactAccountContract(contractVersion: string, wait = true): Promise<string> {

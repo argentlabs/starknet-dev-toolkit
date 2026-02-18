@@ -23,6 +23,7 @@ export interface DevnetMixin {
   handleJsonRpc(method: string, params?: Record<string, unknown>): Promise<unknown>;
 }
 
+// TODO Could this be replace with starknet-devnet?
 export function WithDevnet<T extends Constructor<RpcProvider>>(Base: T): Constructor<InstanceType<T> & DevnetMixin> {
   return class extends Base {
     get isDevnet() {
