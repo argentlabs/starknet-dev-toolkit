@@ -1,4 +1,4 @@
-import type { RpcProvider } from "starknet";
+import { type RpcProvider } from "starknet";
 import { generateRandomNumber } from "./random.js";
 import type { Constructor } from "./types.js";
 
@@ -42,7 +42,7 @@ export function WithDevnet<T extends Constructor<RpcProvider>>(Base: T): Constru
     }
 
     async mintEth(address: string, amount: number | bigint) {
-      await this.handleJsonRpc("devnet_mint", { address, amount: Number(amount) });
+      await this.handleJsonRpc("devnet_mint", { address, amount: Number(amount), unit: "WEI" });
     }
 
     async mintStrk(address: string, amount: number | bigint) {
@@ -97,26 +97,28 @@ export function WithDevnet<T extends Constructor<RpcProvider>>(Base: T): Constru
   } as unknown as Constructor<InstanceType<T> & DevnetMixin>;
 }
 
-type DevnetAccountPayload = {
+export type DevnetAccountPayload = {
   address: string;
   private_key: string;
 };
+
+// TODO This could use starknet-devnet
+export async function getPredeployedDevnetAccounts(provider: DevnetMixin): Promise<DevnetAccountPayload[]> {
+  if (provider.isDevnet === false) {
+    throw new Error("Predeployed account lookup requires devnet");
+  }
+  return (await provider.handleJsonRpc("devnet_getPredeployedAccounts")) as DevnetAccountPayload[];
+}
 
 export async function getPredeployedDevnetAccount(
   provider: DevnetMixin,
   excludeAddress?: string,
 ): Promise<{ address: string; privateKey: string }> {
-  if (provider.isDevnet === false) {
-    throw new Error("Predeployed account lookup requires devnet");
-  }
-
-  const accounts = (await provider.handleJsonRpc("devnet_getPredeployedAccounts")) as DevnetAccountPayload[];
-
+  const accounts = await getPredeployedDevnetAccounts(provider);
   const excluded = excludeAddress?.toLowerCase();
   const candidate = accounts.find((account) => !excluded || account.address.toLowerCase() !== excluded);
   if (!candidate) {
     throw new Error("No predeployed devnet account available");
   }
-
   return { address: candidate.address, privateKey: candidate.private_key };
 }

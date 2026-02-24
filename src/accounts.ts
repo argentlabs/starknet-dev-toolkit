@@ -28,6 +28,7 @@ import {
   uint256,
 } from "starknet";
 import type { ArgentAccountContract } from "./contractTypes.js";
+import { getPredeployedDevnetAccount } from "./devnet.js";
 import { getEnv } from "./env.js";
 import { manager } from "./manager.js";
 import { getOutsideExecutionCall } from "./outsideExecution.js";
@@ -94,7 +95,10 @@ class ArgentWallet implements ArgentWallet {
       transactionHash: string;
     },
   ): Promise<ArgentWallet> {
-    const accountContract: ArgentAccountContract = await manager.loadContract(finalParams.account.address);
+    const accountContract: ArgentAccountContract = await manager.loadContract(
+      finalParams.account.address,
+      finalParams.classHash,
+    );
     accountContract.providerOrAccount = finalParams.account;
 
     return new ArgentWallet(
@@ -117,18 +121,16 @@ interface LegacyArgentWallet {
 }
 
 let cachedDeployer: Account | undefined;
+let deployerInitPromise: Promise<Account> | undefined;
 
-export function getDeployer(): Account {
-  if (cachedDeployer) {
-    return cachedDeployer;
-  }
+async function initDeployer(): Promise<Account> {
+  if (cachedDeployer) return cachedDeployer;
   if (manager.isDevnet) {
-    const devnetAddress = "0x64b48806902a367c8598f4f95c305e8c1a1acba5f082d294a43793113115691";
-    const devnetPrivateKey = "0x71d7bb07b9a64f6f78ac4c816aff4da9";
+    const { address, privateKey } = await getPredeployedDevnetAccount(manager);
     cachedDeployer = new Account({
       provider: manager,
-      address: devnetAddress,
-      signer: devnetPrivateKey,
+      address,
+      signer: privateKey,
       cairoVersion: "1",
       transactionVersion: ETransactionVersion.V3,
     });
@@ -151,18 +153,28 @@ export function getDeployer(): Account {
   return cachedDeployer;
 }
 
-// Proxy to enable lazy loading of the deployer
+// Proxy that auto-initializes the deployer on first async call, then serves from cache
 export const deployer = new Proxy<Account>({} as Account, {
   get(_target, prop) {
-    const current = getDeployer();
-    const value = current[prop as keyof Account];
-    if (typeof value === "function") {
-      return value.bind(current);
+    if (cachedDeployer) {
+      const value = cachedDeployer[prop as keyof Account];
+      return typeof value === "function" ? value.bind(cachedDeployer) : value;
     }
-    return value;
+    return async (...args: unknown[]) => {
+      if (!deployerInitPromise) {
+        deployerInitPromise = initDeployer();
+      }
+      const account = await deployerInitPromise;
+      const fn = account[prop as keyof Account];
+      if (typeof fn === "function") {
+        return (fn as (...a: unknown[]) => unknown).bind(account)(...args);
+      }
+      return fn;
+    };
   },
   has(_target, prop) {
-    return prop in getDeployer();
+    if (cachedDeployer) return prop in cachedDeployer;
+    return prop in Account.prototype;
   },
 });
 
@@ -231,6 +243,7 @@ async function deployAccountInner(params: DeployAccountParams): Promise<ArgentWa
   const guardians = params.guardian ? [params.guardian] : params.guardians;
   const finalParams = {
     ...params,
+    // TODO classhash needs to be defined otherwise local does not work.
     classHash: params.classHash ?? (await manager.declareLocalContract("ArgentAccount")),
     salt: params.salt ?? num.toHex(randomStarknetKeyPair().privateKey),
     owners: owners ?? [randomStarknetKeyPair()],
@@ -393,7 +406,7 @@ async function deployLegacyAccountInner(
   });
   await manager.waitForTx(transaction_hash);
 
-  const accountContract: ArgentAccountContract = await manager.loadContract(account.address);
+  const accountContract: ArgentAccountContract = await manager.loadContract(account.address, classHash);
   accountContract.providerOrAccount = account;
   return { account, accountContract, owner, guardian };
 }

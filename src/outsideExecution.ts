@@ -1,5 +1,5 @@
-import type { BigNumberish, Call, RawArgs, SignerInterface } from "starknet";
-import { CallData, hash, typedData, TypedDataRevision } from "starknet";
+import type { BigNumberish, Call, OutsideCall, SignerInterface } from "starknet";
+import { CallData, typedData, TypedDataRevision } from "starknet";
 import { manager } from "./manager.js";
 
 const typesRev0 = {
@@ -69,20 +69,6 @@ export interface OutsideExecution {
   execute_after: BigNumberish;
   execute_before: BigNumberish;
   calls: OutsideCall[];
-}
-
-export interface OutsideCall {
-  to: string;
-  selector: BigNumberish;
-  calldata: RawArgs;
-}
-
-export function getOutsideCall(call: Call): OutsideCall {
-  return {
-    to: call.contractAddress,
-    selector: hash.getSelectorFromName(call.entrypoint),
-    calldata: call.calldata ?? [],
-  };
 }
 
 export function getTypedDataHash(

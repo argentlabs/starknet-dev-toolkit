@@ -158,7 +158,7 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
       classHash ??= await this.getClassHashAt(contractAddress);
       let abi = this.abiCache[classHash];
       if (!abi) {
-        abi = (await this.getClassAt(contractAddress)).abi;
+        abi = (await this.getClassByHash(classHash)).abi;
         this.abiCache[classHash] = abi;
       }
       return new Contract({

@@ -1,9 +1,8 @@
 import type { Call } from "starknet";
-import { CallData } from "starknet";
-import { getOutsideCall } from "./outsideExecution.js";
+import { CallData, outsideExecution } from "starknet";
 
 export function getUpgradeData(calls: Call[]) {
-  const externalCalls = calls.map(getOutsideCall);
+  const externalCalls = calls.map(outsideExecution.getOutsideCall);
   return CallData.compile({ externalCalls });
 }
 
