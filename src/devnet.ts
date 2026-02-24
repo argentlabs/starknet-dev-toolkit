@@ -97,24 +97,17 @@ export function WithDevnet<T extends Constructor<RpcProvider>>(Base: T): Constru
   } as unknown as Constructor<InstanceType<T> & DevnetMixin>;
 }
 
-export type DevnetAccountPayload = {
-  address: string;
-  private_key: string;
-};
-
-// TODO This could use starknet-devnet
-export async function getPredeployedDevnetAccounts(provider: DevnetMixin): Promise<DevnetAccountPayload[]> {
-  if (provider.isDevnet === false) {
-    throw new Error("Predeployed account lookup requires devnet");
-  }
-  return (await provider.handleJsonRpc("devnet_getPredeployedAccounts")) as DevnetAccountPayload[];
-}
-
 export async function getPredeployedDevnetAccount(
   provider: DevnetMixin,
   excludeAddress?: string,
 ): Promise<{ address: string; privateKey: string }> {
-  const accounts = await getPredeployedDevnetAccounts(provider);
+  if (provider.isDevnet === false) {
+    throw new Error("Predeployed account lookup requires devnet");
+  }
+  const accounts = (await provider.handleJsonRpc("devnet_getPredeployedAccounts")) as {
+    address: string;
+    private_key: string;
+  }[];
   const excluded = excludeAddress?.toLowerCase();
   const candidate = accounts.find((account) => !excluded || account.address.toLowerCase() !== excluded);
   if (!candidate) {

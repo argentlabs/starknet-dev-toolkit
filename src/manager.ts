@@ -1,3 +1,4 @@
+import type { ProviderInterface } from "starknet";
 import { RpcProvider } from "starknet";
 import { WithContracts } from "./contracts.js";
 import { WithDevnet, devnetBaseUrl } from "./devnet.js";
@@ -32,4 +33,4 @@ function getManager(): Manager {
   return instance;
 }
 
-export const manager: Manager = getManager();
+export const manager: Manager & ProviderInterface = getManager() as Manager & ProviderInterface;
