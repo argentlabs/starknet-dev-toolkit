@@ -120,63 +120,37 @@ interface LegacyArgentWallet {
   guardian?: LegacyKeyPair;
 }
 
-let cachedDeployer: Account | undefined;
-let deployerInitPromise: Promise<Account> | undefined;
-
 async function initDeployer(): Promise<Account> {
-  if (cachedDeployer) return cachedDeployer;
   if (manager.isDevnet) {
     const { address, privateKey } = await getPredeployedDevnetAccount(manager);
-    cachedDeployer = new Account({
+    const account = new Account({
       provider: manager,
       address,
       signer: privateKey,
       cairoVersion: "1",
       transactionVersion: ETransactionVersion.V3,
     });
-  } else {
-    const { deployerAddress: address, deployerPrivateKey: privateKey } = getEnv();
-    if (!address || !privateKey) {
-      throw new Error(
-        "Missing deployer credentials. Set deployerAddress/deployerPrivateKey via setEnvProvider, or ADDRESS/PRIVATE_KEY in Node.",
-      );
-    }
-    cachedDeployer = new Account({
-      provider: manager,
-      address,
-      signer: privateKey,
-      cairoVersion: "1",
-      transactionVersion: ETransactionVersion.V3,
-    });
+    console.log("Deployer:", account.address);
+    return account;
   }
-  console.log("Deployer:", cachedDeployer.address);
-  return cachedDeployer;
+  const { deployerAddress: address, deployerPrivateKey: privateKey } = getEnv();
+  if (!address || !privateKey) {
+    throw new Error(
+      "Missing deployer credentials. Set deployerAddress/deployerPrivateKey via setEnvProvider, or ADDRESS/PRIVATE_KEY in Node.",
+    );
+  }
+  const account = new Account({
+    provider: manager,
+    address,
+    signer: privateKey,
+    cairoVersion: "1",
+    transactionVersion: ETransactionVersion.V3,
+  });
+  console.log("Deployer:", account.address);
+  return account;
 }
 
-// Proxy that auto-initializes the deployer on first async call, then serves from cache
-export const deployer = new Proxy<Account>({} as Account, {
-  get(_target, prop) {
-    if (cachedDeployer) {
-      const value = cachedDeployer[prop as keyof Account];
-      return typeof value === "function" ? value.bind(cachedDeployer) : value;
-    }
-    return async (...args: unknown[]) => {
-      if (!deployerInitPromise) {
-        deployerInitPromise = initDeployer();
-      }
-      const account = await deployerInitPromise;
-      const fn = account[prop as keyof Account];
-      if (typeof fn === "function") {
-        return (fn as (...a: unknown[]) => unknown).bind(account)(...args);
-      }
-      return fn;
-    };
-  },
-  has(_target, prop) {
-    if (cachedDeployer) return prop in cachedDeployer;
-    return prop in Account.prototype;
-  },
-});
+export const deployer: Account = await initDeployer();
 
 export async function deployOldAccountWithProxy(
   owner = new LegacyStarknetKeyPair(),
