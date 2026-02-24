@@ -2,6 +2,7 @@ import type { ArraySignatureType, CairoCustomEnum, Call, StarknetDomain, TypedDa
 import { CallData, TypedDataRevision, byteArray, hash, merkle, selector, shortString, typedData } from "starknet";
 import type { ArgentAccount } from "../accounts.js";
 import type { ArgentAccountContract } from "../contractTypes.js";
+import type { ContractLike } from "../contracts.js";
 import { manager } from "../manager.js";
 import type { EstimateStarknetKeyPair, StarknetKeyPair } from "../signers/signers.js";
 import { randomStarknetKeyPair } from "../signers/signers.js";
@@ -32,6 +33,15 @@ export const ALLOWED_METHOD_HASH = typedData.getTypeHash(sessionTypes, "Allowed 
 export interface AllowedMethod {
   "Contract Address": string;
   selector: string;
+}
+
+export function singleMethodAllowList(contract: string | ContractLike, selector: string): AllowedMethod[] {
+  return [
+    {
+      "Contract Address": typeof contract === "string" ? contract : contract.address,
+      selector,
+    },
+  ];
 }
 
 export interface OnChainSession {
