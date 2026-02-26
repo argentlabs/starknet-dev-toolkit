@@ -210,22 +210,27 @@ function getSubfolders(dirPath: string): string[] {
 }
 
 function resolveContractFile(contractName: string, folder: string): string {
-  // Todo find a fix for files that should start with _
   const suffix = ".contract_class.json";
   const directPath = join(folder, `${contractName}${suffix}`);
   if (existsSync(directPath)) {
     return directPath;
   }
 
-  // Scan for prefixed files (e.g. "argent_Token.contract_class.json" when contractName is "Token")
+  // Scan for prefixed files (e.g. "argent_AccountUpgradeable.contract_class.json" when contractName is "AccountUpgradeable")
   const target = `${contractName}${suffix}`;
   const absoluteDir = resolve(folder);
   const files = readdirSync(absoluteDir);
-  const match = files.find((f) => f.endsWith(target));
-  if (!match) {
+  const matches = files.filter((f) => f === target || f.endsWith(target));
+  if (matches.length === 1) return resolve(absoluteDir, matches[0]);
+
+  if (matches.length === 0) {
     throw new Error(`No file matching "*${target}" found in ${absoluteDir}`);
   }
-  return resolve(absoluteDir, match);
+  const exact = matches.find((f) => f === target);
+  if (exact) return resolve(absoluteDir, exact);
+  throw new Error(
+    `Multiple files match "${target}" in ${absoluteDir}: ${matches.join(", ")}. Pass a path that uniquely identifies the contract.`,
+  );
 }
 
 // This has to be fast. We don't care much about collisions
