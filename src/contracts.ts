@@ -21,7 +21,7 @@ import type { Constructor } from "./types.js";
 const contractsFolder = "./target/release";
 const artifactsFolder = "./deployments/artifacts";
 const cacheClassHashFilepath = "./dist/classHashCache.json";
-type CacheClassHashes = Record<string, { compiledClassHash: string | undefined; classHash: string }>;
+type CacheClassHashes = Record<string, { classHash: string; compiledClassHash?: string }>;
 
 export interface ContractsMixin {
   clearClassCache(): void;
@@ -49,7 +49,7 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
     // Holds the latest know class hashes for a given contract
     // It doesn't guarantee that the class hash is up to date, or that the contact is declared
     // They key is the fileHash of the contract class file
-    protected cacheClassHashes: Record<string, { compiledClassHash: string | undefined; classHash: string }> = {};
+    protected cacheClassHashes: Record<string, { classHash: string; compiledClassHash?: string }> = {};
 
     protected abiCache: Record<string, Abi> = {};
 
@@ -108,10 +108,11 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
       }
 
       const fileHash = await hashFileFast(contractClassPath);
-      // If the contract is not in the cache, extract the class hash and add it to the cache
       if (!this.cacheClassHashes[fileHash]) {
         console.log(`Updating cache for ${contractName} (${fileHash})`);
-        const { compiledClassHash, classHash } = extractContractHashes(payload);
+        // `starknetVersion` can be removed once we drop support for RPC version 0.9.0
+        const starknetVersion = await this.channel.getStarknetVersion();
+        const { compiledClassHash, classHash } = extractContractHashes(payload, starknetVersion);
         this.cacheClassHashes[fileHash] = { compiledClassHash, classHash };
         writeFileSync(cacheClassHashFilepath, JSON.stringify(this.cacheClassHashes, null, 2));
       }
@@ -218,9 +219,10 @@ function resolveContractFile(contractName: string, folder: string): string {
 
   // Scan for prefixed files (e.g. "argent_AccountUpgradeable.contract_class.json" when contractName is "AccountUpgradeable")
   const target = `${contractName}${suffix}`;
+  const prefixed = `_${contractName}${suffix}`;
   const absoluteDir = resolve(folder);
   const files = readdirSync(absoluteDir);
-  const matches = files.filter((f) => f === target || f.endsWith(target));
+  const matches = files.filter((f) => f === target || f.endsWith(prefixed));
   if (matches.length === 1) return resolve(absoluteDir, matches[0]);
 
   if (matches.length === 0) {

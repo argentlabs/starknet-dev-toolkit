@@ -1,4 +1,4 @@
-import type { ProviderInterface } from "starknet";
+import type { ProviderInterface, RpcProviderOptions } from "starknet";
 import { RpcProvider } from "starknet";
 import { WithContracts } from "./contracts.js";
 import { WithDevnet, devnetBaseUrl } from "./devnet.js";
@@ -9,8 +9,8 @@ import { TokenManager } from "./tokens.js";
 export class Manager extends WithReceipts(WithContracts(WithDevnet(RpcProvider))) {
   tokens: TokenManager;
 
-  constructor(nodeUrl: string) {
-    super({ nodeUrl });
+  constructor(options: RpcProviderOptions) {
+    super(options);
     this.tokens = new TokenManager(this);
   }
 
@@ -19,7 +19,7 @@ export class Manager extends WithReceipts(WithContracts(WithDevnet(RpcProvider))
   }
 }
 
-function getManager(): Manager {
+async function getManager(): Promise<Manager> {
   const env = getEnv();
   if (env.nodeUrl !== devnetBaseUrl && !env.allowRpcUrlEnv) {
     console.log("When using a custom RPC URL, you must set allowRpcUrlEnv: true or pass --allow-rpc-url-env");
@@ -27,10 +27,13 @@ function getManager(): Manager {
       process.exit(1);
     }
   }
-  const instance = new Manager(env.nodeUrl);
+  const instance: Manager = await (RpcProvider.create as (opts: { nodeUrl: string }) => Promise<Manager>).call(
+    Manager,
+    { nodeUrl: env.nodeUrl },
+  );
   console.log("Provider:", instance.channel.nodeUrl);
-  void instance.channel.getSpecVersion().then((v) => console.log("RPC version:", v));
+  void instance.channel.getSpecVersion().then((v: string) => console.log("RPC version:", v));
   return instance;
 }
 
-export const manager: Manager & ProviderInterface = getManager() as Manager & ProviderInterface;
+export const manager: Manager & ProviderInterface = (await getManager()) as Manager & ProviderInterface;
