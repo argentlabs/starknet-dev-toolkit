@@ -131,7 +131,9 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
         const msg = err instanceof Error ? err.message : String(err);
         if (msg.includes("compiled class hash did not match")) {
           // console.error("Original error:", msg);
-          throw new Error(`Declare failed: compiled class hash mismatch. Cause is likely local cache is outdated. Delete "${cacheClassHashFilepath}" and retry.`);
+          throw new Error(
+            `Declare failed: compiled class hash mismatch. Cause is likely local cache is outdated. Delete "${cacheClassHashFilepath}" and retry.`,
+          );
         }
         throw err;
       }
