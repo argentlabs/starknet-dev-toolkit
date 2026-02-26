@@ -111,6 +111,7 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
       if (!this.cacheClassHashes[fileHash]) {
         console.log(`Updating cache for ${contractName} (${fileHash})`);
         // `starknetVersion` can be removed once we drop support for RPC version 0.9.0
+        // And same for the try/catch block below that just happens with contract first compiled with version 10 then deployed with version 9.
         const starknetVersion = await this.channel.getStarknetVersion();
         const { compiledClassHash, classHash } = extractContractHashes(payload, starknetVersion);
         this.cacheClassHashes[fileHash] = { compiledClassHash, classHash };
@@ -122,7 +123,18 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
       payload.compiledClassHash = this.cacheClassHashes[fileHash].compiledClassHash;
       payload.classHash = this.cacheClassHashes[fileHash].classHash;
 
-      const { class_hash, transaction_hash } = await deployer.declareIfNot(payload, details);
+      let class_hash: string;
+      let transaction_hash: string;
+      try {
+        ({ class_hash, transaction_hash } = await deployer.declareIfNot(payload, details));
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (msg.includes("compiled class hash did not match")) {
+          // console.error("Original error:", msg);
+          throw new Error(`Declare failed: compiled class hash mismatch. Cause is likely local cache is outdated. Delete "${cacheClassHashFilepath}" and retry.`);
+        }
+        throw err;
+      }
       if (wait && transaction_hash) {
         await this.waitForTransaction(transaction_hash);
         console.log(`\t${contractName} declared`);
