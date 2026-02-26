@@ -209,6 +209,20 @@ async function deployOldAccountWithProxyInner(
   return { account, accountContract, owner, guardian };
 }
 
+const DEFAULT_ACCOUNT_CONTRACT = "ArgentAccount";
+
+async function resolveAccountClassHash(params: DeployAccountParams): Promise<string> {
+  if (params.classHash) return params.classHash;
+  try {
+    return await manager.declareLocalContract(DEFAULT_ACCOUNT_CONTRACT);
+  } catch (err) {
+    throw new Error(
+      `Account classHash is required. Either pass classHash or run from a repo with "${DEFAULT_ACCOUNT_CONTRACT}" artifacts.`,
+      { cause: err },
+    );
+  }
+}
+
 async function deployAccountInner(params: DeployAccountParams): Promise<ArgentWallet> {
   if (params.guardian && params.guardians) throw new Error("Cannot deploy with guardian and guardians both defined");
   if (params.owner && params.owners) throw new Error("Cannot deploy with owner and owners both defined");
@@ -217,8 +231,7 @@ async function deployAccountInner(params: DeployAccountParams): Promise<ArgentWa
   const guardians = params.guardian ? [params.guardian] : params.guardians;
   const finalParams = {
     ...params,
-    // TODO classhash needs to be defined otherwise local does not work.
-    classHash: params.classHash ?? (await manager.declareLocalContract("ArgentAccount")),
+    classHash: await resolveAccountClassHash(params),
     salt: params.salt ?? num.toHex(randomStarknetKeyPair().privateKey),
     owners: owners ?? [randomStarknetKeyPair()],
     guardians: guardians ?? [],

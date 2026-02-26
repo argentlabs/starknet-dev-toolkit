@@ -177,7 +177,7 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
       const classHash = await this.declareLocalContract(contractName, true, contractsFolder);
       const { contract_address } = await deployer.deployContract({ ...payload, classHash }, details);
 
-      // TODO could avoid network request and just create the contract using the ABI
+      // TODO could avoid network request and just create the contract using the ABI (remark from before creating this lib)
       return await this.loadContract<T>(contract_address, classHash);
     }
   } as unknown as Constructor<InstanceType<T> & ContractsMixin>;
