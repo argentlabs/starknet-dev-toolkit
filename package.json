@@ -1,6 +1,6 @@
 {
   "name": "starknet-dev-toolkit",
-  "version": "0.1.0",
+  "version": "0.1.0-rc.0",
   "type": "module",
   "engines": {
     "node": "24.x",
