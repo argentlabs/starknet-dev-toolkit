@@ -46,12 +46,14 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
   return class extends Base {
     // Maps a contract name to its class hash to avoid redeclaring the same contract
     protected declaredContracts: Record<string, string> = {};
-    // Holds the latest know class hashes for a given contract
-    // It doesn't guarantee that the class hash is up to date, or that the contact is declared
-    // They key is the fileHash of the contract class file
+    // Holds the latest known class hashes for a given contract
+    // It doesn't guarantee that the class hash is up to date, or that the contract is declared
+    // The key is `${rpcVersion}:${fileHash}` to account for different RPC versions
     protected cacheClassHashes: Record<string, { classHash: string; compiledClassHash?: string }> = {};
 
     protected abiCache: Record<string, Abi> = {};
+
+    protected rpcVersion: string | undefined;
 
     clearClassCache() {
       for (const contractName of Object.keys(this.declaredContracts)) {
@@ -97,6 +99,10 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
         };
       }
 
+      if (!this.rpcVersion) {
+        this.rpcVersion = this.readSpecVersion() ?? await this.getSpecVersion();
+      }
+
       // If cache isn't initialized, initialize it
       if (Object.keys(this.cacheClassHashes).length === 0) {
         if (!existsSync(cacheClassHashFilepath)) {
@@ -108,35 +114,21 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
       }
 
       const fileHash = await hashFileFast(contractClassPath);
-      if (!this.cacheClassHashes[fileHash]) {
-        console.log(`Updating cache for ${contractName} (${fileHash})`);
-        // `starknetVersion` can be removed once we drop support for RPC version 0.9.0
-        // And same for the try/catch block below that just happens with contract first compiled with version 10 then deployed with version 9.
+      const cacheKey = `${this.rpcVersion}:${fileHash}`;
+      if (!this.cacheClassHashes[cacheKey]) {
+        console.log(`Updating cache for ${contractName} (${cacheKey})`);
         const starknetVersion = await this.channel.getStarknetVersion();
         const { compiledClassHash, classHash } = extractContractHashes(payload, starknetVersion);
-        this.cacheClassHashes[fileHash] = { compiledClassHash, classHash };
+        this.cacheClassHashes[cacheKey] = { compiledClassHash, classHash };
         writeFileSync(cacheClassHashFilepath, JSON.stringify(this.cacheClassHashes, null, 2));
       }
 
       // Populate the payload with the class hash
       // If you don't restart devnet, and provide a wrong compiledClassHash, it will work
-      payload.compiledClassHash = this.cacheClassHashes[fileHash].compiledClassHash;
-      payload.classHash = this.cacheClassHashes[fileHash].classHash;
+      payload.compiledClassHash = this.cacheClassHashes[cacheKey].compiledClassHash;
+      payload.classHash = this.cacheClassHashes[cacheKey].classHash;
 
-      let class_hash: string;
-      let transaction_hash: string;
-      try {
-        ({ class_hash, transaction_hash } = await deployer.declareIfNot(payload, details));
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        if (msg.includes("compiled class hash did not match")) {
-          // console.error("Original error:", msg);
-          throw new Error(
-            `Declare failed: compiled class hash mismatch. Cause is likely local cache is outdated. Delete "${cacheClassHashFilepath}" and retry.`,
-          );
-        }
-        throw err;
-      }
+      const { class_hash, transaction_hash } = await deployer.declareIfNot(payload, details);
       if (wait && transaction_hash) {
         await this.waitForTransaction(transaction_hash);
         console.log(`\t${contractName} declared`);
