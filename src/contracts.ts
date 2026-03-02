@@ -100,7 +100,7 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
       }
 
       if (!this.rpcVersion) {
-        this.rpcVersion = this.readSpecVersion() ?? await this.getSpecVersion();
+        this.rpcVersion = this.readSpecVersion() ?? (await this.getSpecVersion());
       }
 
       // If cache isn't initialized, initialize it
