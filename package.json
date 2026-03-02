@@ -32,7 +32,6 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --check .",
     "format:write": "prettier --write .",
-    "prepare": "pnpm build",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
