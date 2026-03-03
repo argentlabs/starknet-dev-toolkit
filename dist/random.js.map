@@ -1,0 +1,1 @@
+{"version":3,"file":"random.js","sourceRoot":"","sources":["../src/random.ts"],"names":[],"mappings":"AAAA,MAAM,UAAU,oBAAoB;IAClC,OAAO,MAAM,CAAC,IAAI,CAAC,KAAK,CAAC,IAAI,CAAC,MAAM,EAAE,GAAG,YAAY,CAAC,CAAC,CAAC;AAC1D,CAAC","sourcesContent":["export function generateRandomNumber(): bigint {\n  return BigInt(Math.floor(Math.random() * 100000000000));\n}\n"]}

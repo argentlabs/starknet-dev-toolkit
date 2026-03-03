@@ -1,0 +1,1 @@
+{"version":3,"file":"udc.d.ts","sourceRoot":"","sources":["../src/udc.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,WAAW,EAAoC,MAAM,UAAU,CAAC;AAI9E,wBAAsB,iBAAiB,CACrC,SAAS,EAAE,MAAM,EACjB,IAAI,EAAE,MAAM,EACZ,mBAAmB,EAAE,WAAW,GAC/B,OAAO,CAAC;IAAE,eAAe,EAAE,MAAM,CAAC;IAAC,eAAe,EAAE,MAAM,CAAA;CAAE,CAAC,CAY/D"}
