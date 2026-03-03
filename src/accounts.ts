@@ -122,11 +122,7 @@ interface LegacyArgentWallet {
 
 async function initDeployer(): Promise<Account> {
   if (manager.isDevnet) {
-    const { address, privateKey } = await getPredeployedDevnetAccount(manager);
-    const account = new Account({
-      provider: manager,
-      address,
-      signer: privateKey,
+    const account = await getPredeployedDevnetAccount(manager, undefined, {
       cairoVersion: "1",
       transactionVersion: ETransactionVersion.V3,
     });

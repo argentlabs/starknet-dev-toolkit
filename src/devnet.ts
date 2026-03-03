@@ -1,4 +1,4 @@
-import { type RpcProvider } from "starknet";
+import { Account, type AccountOptions, type ProviderInterface, type RpcProvider } from "starknet";
 import { generateRandomNumber } from "./random.js";
 import type { Constructor } from "./types.js";
 
@@ -98,9 +98,10 @@ export function WithDevnet<T extends Constructor<RpcProvider>>(Base: T): Constru
 }
 
 export async function getPredeployedDevnetAccount(
-  provider: DevnetMixin,
+  provider: DevnetMixin & ProviderInterface,
   excludeAddress?: string,
-): Promise<{ address: string; privateKey: string }> {
+  accountOptions?: Partial<AccountOptions>,
+): Promise<Account> {
   if (provider.isDevnet === false) {
     throw new Error("Predeployed account lookup requires devnet");
   }
@@ -113,5 +114,10 @@ export async function getPredeployedDevnetAccount(
   if (!candidate) {
     throw new Error("No predeployed devnet account available");
   }
-  return { address: candidate.address, privateKey: candidate.private_key };
+  return new Account({
+    provider,
+    address: candidate.address,
+    signer: candidate.private_key,
+    ...accountOptions,
+  });
 }
