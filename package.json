@@ -32,7 +32,8 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --check .",
     "format:write": "prettier --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepare": "pnpm build"
   },
   "dependencies": {
     "@noble/curves": "1.7.0",
