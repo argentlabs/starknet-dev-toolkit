@@ -38,6 +38,8 @@ import type { KeyPair } from "./signers/signers.js";
 import { ArgentSigner, RawSigner, randomStarknetKeyPair } from "./signers/signers.js";
 import { strkAddress } from "./tokens.js";
 
+export const ARGENT_ACCOUNT_CLASS_HASH_0_5_0 = "0x073414441639dcd11d1846f287650a00c60c416b9d3ba45d31c651672125b2c2";
+
 export class ArgentAccount extends Account {
   constructor(options: AccountOptions) {
     super(options);
