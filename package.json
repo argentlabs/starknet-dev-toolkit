@@ -1,0 +1,92 @@
+{
+  "name": "starknet-dev-toolkit",
+  "version": "0.1.0-rc.0",
+  "type": "module",
+  "engines": {
+    "node": "24.x",
+    "pnpm": "10.x"
+  },
+  "license": "ISC",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./browser": {
+      "types": "./dist/browser.d.ts",
+      "import": "./dist/browser.js"
+    },
+    "./ensure-devnet": {
+      "types": "./dist/ensureDevnet.d.ts",
+      "import": "./dist/ensureDevnet.js"
+    },
+    "./env": {
+      "types": "./dist/env.d.ts",
+      "import": "./dist/env.js"
+    },
+    "./devnet": {
+      "types": "./dist/devnet.d.ts",
+      "import": "./dist/devnet.js"
+    },
+    "./tokens": {
+      "types": "./dist/tokens.d.ts",
+      "import": "./dist/tokens.js"
+    },
+    "./signers/signers": {
+      "types": "./dist/signers/signers.d.ts",
+      "import": "./dist/signers/signers.js"
+    },
+    "./signers/secp256": {
+      "types": "./dist/signers/secp256.d.ts",
+      "import": "./dist/signers/secp256.js"
+    },
+    "./signers/webauthn": {
+      "types": "./dist/signers/webauthn.d.ts",
+      "import": "./dist/signers/webauthn.js"
+    },
+    "./browser-shims/*": "./browser-shims/*.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "browser-shims"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "clean": "rm -rf dist",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "prepare": "pnpm build"
+  },
+  "dependencies": {
+    "@noble/curves": "1.7.0",
+    "dotenv": "17.2.3",
+    "ethers": "6.16.0",
+    "lodash-es": "4.17.23"
+  },
+  "peerDependencies": {
+    "chai": "5.1.1",
+    "chai-as-promised": "8.0.2",
+    "starknet": "9.2.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.2",
+    "@tsconfig/node24": "24.0.4",
+    "@types/chai": "5.2.3",
+    "@types/chai-as-promised": "8.0.2",
+    "@types/lodash-es": "4.17.12",
+    "@types/node": "25.2.0",
+    "eslint": "9.39.2",
+    "globals": "17.3.0",
+    "prettier": "3.8.1",
+    "prettier-plugin-organize-imports": "4.3.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.54.0"
+  },
+  "packageManager": "pnpm@10.29.3"
+}
