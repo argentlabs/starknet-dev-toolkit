@@ -12,9 +12,37 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./browser": {
+      "types": "./dist/browser.d.ts",
+      "import": "./dist/browser.js"
+    },
     "./ensure-devnet": {
       "types": "./dist/ensureDevnet.d.ts",
       "import": "./dist/ensureDevnet.js"
+    },
+    "./env": {
+      "types": "./dist/env.d.ts",
+      "import": "./dist/env.js"
+    },
+    "./devnet": {
+      "types": "./dist/devnet.d.ts",
+      "import": "./dist/devnet.js"
+    },
+    "./tokens": {
+      "types": "./dist/tokens.d.ts",
+      "import": "./dist/tokens.js"
+    },
+    "./signers/signers": {
+      "types": "./dist/signers/signers.d.ts",
+      "import": "./dist/signers/signers.js"
+    },
+    "./signers/secp256": {
+      "types": "./dist/signers/secp256.d.ts",
+      "import": "./dist/signers/secp256.js"
+    },
+    "./signers/webauthn": {
+      "types": "./dist/signers/webauthn.d.ts",
+      "import": "./dist/signers/webauthn.js"
     },
     "./browser-shims/*": "./browser-shims/*.js"
   },
