@@ -1,9 +1,9 @@
 import { Account, CallData, ETransactionVersion, hash, num } from "starknet";
+import type { ContractWithClassHash } from "../contracts/loadContract.js";
+import { manager } from "../manager.js";
+import { LegacyMultisigSigner, LegacyStarknetKeyPair } from "../signers/legacy.js";
+import { randomStarknetKeyPair } from "../signers/signers.js";
 import { deployer, fundAccountWithStrkCall } from "./accounts.js";
-import type { ContractWithClassHash } from "./contracts.js";
-import { manager } from "./manager.js";
-import { LegacyMultisigSigner, LegacyStarknetKeyPair } from "./signers/legacy.js";
-import { randomStarknetKeyPair } from "./signers/signers.js";
 
 type DeployOzAccountParams = {
   owner?: LegacyStarknetKeyPair;

@@ -1,12 +1,12 @@
 import type { GetTransactionReceiptResponse } from "starknet";
 import { Account, CallData, defaultDeployer, ETransactionVersion, hash, num } from "starknet";
+import type { ArgentMultisigContract } from "../contracts/contractTypes.js";
+import { manager } from "../manager.js";
+import type { LegacyMultisigKeyPair } from "../signers/legacy.js";
+import { LegacyMultisigSigner, randomLegacyMultisigKeyPairs } from "../signers/legacy.js";
+import type { KeyPair } from "../signers/signers.js";
+import { MultisigSigner, randomStarknetKeyPair, randomStarknetKeyPairs, sortByGuid } from "../signers/signers.js";
 import { ArgentAccount, deployer, fundAccountWithStrk, fundAccountWithStrkCall } from "./accounts.js";
-import type { ArgentMultisigContract } from "./contractTypes.js";
-import { manager } from "./manager.js";
-import type { LegacyMultisigKeyPair } from "./signers/legacy.js";
-import { LegacyMultisigSigner, randomLegacyMultisigKeyPairs } from "./signers/legacy.js";
-import type { KeyPair } from "./signers/signers.js";
-import { MultisigSigner, randomStarknetKeyPair, randomStarknetKeyPairs, sortByGuid } from "./signers/signers.js";
 
 interface MultisigWallet {
   account: Account;

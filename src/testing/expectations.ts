@@ -1,7 +1,7 @@
 import { assert, expect } from "chai";
 import type { InvokeFunctionResponse } from "starknet";
 import { shortString } from "starknet";
-import { manager } from "./manager.js";
+import { manager } from "../manager.js";
 
 export async function expectRevertWithErrorMessage(
   errorMessage: string,

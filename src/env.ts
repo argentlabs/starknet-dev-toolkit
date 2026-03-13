@@ -1,4 +1,4 @@
-import { devnetBaseUrl } from "./devnet.js";
+import { devnetBaseUrl } from "./devnet/devnet.js";
 
 /**
  * Environment/config used by the toolkit for node URL and deployer credentials.

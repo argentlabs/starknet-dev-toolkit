@@ -1,27 +1,25 @@
 /**
- * Browser-safe entry point. Re-exports only modules that work without Node built-ins
- * (no fs, path, crypto, child_process). Use this from browser apps instead of the
- * barrel "." which eagerly evaluates manager.ts and accounts.ts.
+ * Browser-safe entry point. Composes the same mixins as Manager but without
+ * WithDeclare (which needs fs/path/crypto for contract declaration).
+ * Use this from browser apps instead of the barrel "." which eagerly
+ * evaluates manager.ts and accounts.ts (top-level await + Node-only code).
  */
 
-import type { AccountOptions, EstimateFeeBulk, Invocations, Provider, ProviderInterface, UniversalDetails } from "starknet";
-import { Account, Contract, RpcProvider } from "starknet";
-import { WithDevnet } from "./devnet.js";
-import { ArgentSigner } from "./signers/signers.js";
-import { TokenManager } from "./tokens.js";
+import type { ProviderInterface } from "starknet";
+import { RpcProvider } from "starknet";
+import { WithCachedContractLoader } from "./contracts/loadContract.js";
+import { WithDevnet } from "./devnet/devnet.js";
+import { WithReceipts } from "./provider/receipts.js";
+import { TokenManager } from "./provider/tokens.js";
 
-export class BrowserManager extends WithDevnet(RpcProvider) {
+const BrowserManagerBase = WithReceipts(WithCachedContractLoader(WithDevnet(RpcProvider)));
+
+export class BrowserManager extends BrowserManagerBase {
   tokens: TokenManager;
 
   constructor(options: { nodeUrl: string }) {
     super(options);
     this.tokens = new TokenManager(this as never);
-  }
-
-  async loadContract(contractAddress: string, classHash?: string) {
-    classHash ??= await this.getClassHashAt(contractAddress);
-    const { abi } = await this.getClassByHash(classHash);
-    return new Contract({ abi, address: contractAddress, providerOrAccount: this, classHash });
   }
 
   static async create(options: { nodeUrl: string }): Promise<BrowserManager & ProviderInterface> {
@@ -34,36 +32,17 @@ export class BrowserManager extends WithDevnet(RpcProvider) {
   }
 }
 
-export class ArgentAccount extends Account {
-  constructor(options: AccountOptions) {
-    super(options);
-  }
-
-  override async estimateFeeBulk(invocations: Invocations, details?: UniversalDetails): Promise<EstimateFeeBulk> {
-    details = details ?? {};
-    details.skipValidate = details.skipValidate ?? false;
-    if (this.signer instanceof ArgentSigner) {
-      const { owner, guardian } = this.signer;
-      const estimateSigner = new ArgentSigner(owner.estimateSigner, guardian?.estimateSigner);
-      const estimateAccount = new Account({
-        provider: this as Provider,
-        address: this.address,
-        signer: estimateSigner,
-        cairoVersion: this.cairoVersion,
-        transactionVersion: this.transactionVersion,
-      });
-      return await estimateAccount.estimateFeeBulk(invocations, details);
-    }
-    return await super.estimateFeeBulk(invocations, details);
-  }
-}
-
+export { ARGENT_ACCOUNT_CLASS_HASH_0_5_0, ArgentAccount } from "./accounts/argentAccount.js";
+export { WithCachedContractLoader } from "./contracts/loadContract.js";
+export type { ContractLike, ContractWithClassHash, LoadContractMixin } from "./contracts/loadContract.js";
+export { devnetBaseUrl, getPredeployedDevnetAccount, WithDevnet } from "./devnet/devnet.js";
+export type { DevnetMixin } from "./devnet/devnet.js";
 export { setEnvProvider } from "./env.js";
 export type { ToolkitEnv } from "./env.js";
-export { devnetBaseUrl, getPredeployedDevnetAccount, WithDevnet } from "./devnet.js";
-export type { DevnetMixin } from "./devnet.js";
-export { TokenManager, strkAddress } from "./tokens.js";
-export { ArgentSigner, KeyPair, SignerType, signerTypeToCustomEnum } from "./signers/signers.js";
-export type { NormalizedSecpSignature } from "./signers/secp256.js";
+export { WithReceipts } from "./provider/receipts.js";
+export type { ReceiptsMixin } from "./provider/receipts.js";
+export { strkAddress, TokenManager } from "./provider/tokens.js";
 export { normalizeSecpR1Signature } from "./signers/secp256.js";
+export type { NormalizedSecpSignature } from "./signers/secp256.js";
+export { ArgentSigner, KeyPair, SignerType, signerTypeToCustomEnum } from "./signers/signers.js";
 export { normalizeTransactionHash, toCharArray } from "./signers/webauthn.js";

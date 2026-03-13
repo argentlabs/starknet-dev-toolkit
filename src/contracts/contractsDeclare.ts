@@ -5,34 +5,31 @@ import type {
   Abi,
   CompiledContract,
   CompiledSierraCasm,
+  Contract,
   DeclareContractPayload,
   RpcProvider,
   UniversalDeployerContractPayload,
   UniversalDetails,
 } from "starknet";
-import { Contract, extractContractHashes } from "starknet";
-import { deployer } from "./accounts.js";
-import type { ContractWithPopulate } from "./contractTypes.js";
-import type { DevnetMixin } from "./devnet.js";
-import { readJsonFile } from "./files.js";
-import { l1DataGasPrice, l1GasPrice, l2GasPrice } from "./gas.js";
-import type { Constructor } from "./types.js";
+import { extractContractHashes } from "starknet";
+import { deployer } from "../accounts/accounts.js";
+import type { DevnetMixin } from "../devnet/devnet.js";
+import { l1DataGasPrice, l1GasPrice, l2GasPrice } from "../provider/gas.js";
+import type { Constructor } from "../types.js";
+import { readJsonFile } from "../utils/files.js";
+import type { ContractLike, ContractWithClassHash, LoadContractMixin } from "./loadContract.js";
 
 const contractsFolder = "./target/release";
 const artifactsFolder = "./deployments/artifacts";
 const cacheClassHashFilepath = "./dist/classHashCache.json";
 type CacheClassHashes = Record<string, { classHash: string; compiledClassHash?: string }>;
 
-export interface ContractsMixin {
+export interface DeclareMixin extends LoadContractMixin {
   clearClassCache(): void;
   restartDevnetAndClearClassCache(): Promise<void>;
   declareLocalContract(contractName: string, wait?: boolean, folder?: string): Promise<string>;
   declareArtifactAccountContract(contractVersion: string, wait?: boolean): Promise<string>;
   declareArtifactMultisigContract(contractVersion: string, wait?: boolean): Promise<string>;
-  loadContract<T extends ContractLike = Contract>(
-    contractAddress: string,
-    classHash?: string,
-  ): Promise<ContractWithClassHash<T>>;
   declareAndDeployContract<T extends ContractLike = Contract>(
     contractName: string,
     payload?: Omit<UniversalDeployerContractPayload, "classHash"> | UniversalDeployerContractPayload[],
@@ -40,18 +37,12 @@ export interface ContractsMixin {
   ): Promise<ContractWithClassHash<T>>;
 }
 
-export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
+export function WithDeclare<T extends Constructor<RpcProvider & DevnetMixin & LoadContractMixin>>(
   Base: T,
-): Constructor<InstanceType<T> & ContractsMixin> {
-  return class extends Base {
-    // Maps a contract name to its class hash to avoid redeclaring the same contract
+): Constructor<InstanceType<T> & DeclareMixin> {
+  return class extends (Base as unknown as Constructor<RpcProvider & DevnetMixin & LoadContractMixin>) {
     protected declaredContracts: Record<string, string> = {};
-    // Holds the latest known class hashes for a given contract
-    // It doesn't guarantee that the class hash is up to date, or that the contract is declared
-    // The key is `${rpcVersion}:${fileHash}` to account for different RPC versions
     protected cacheClassHashes: Record<string, { classHash: string; compiledClassHash?: string }> = {};
-
-    protected abiCache: Record<string, Abi> = {};
 
     protected rpcVersion: string | undefined;
 
@@ -68,7 +59,6 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
       }
     }
 
-    // Could extends Account to add our specific fn but that's too early.
     async declareLocalContract(contractName: string, wait = true, folder = contractsFolder): Promise<string> {
       const cachedClass = this.declaredContracts[contractName];
       if (cachedClass) {
@@ -87,7 +77,6 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
       }
 
       let details: UniversalDetails | undefined;
-      // Setting resourceBounds skips estimate
       if (this.isDevnet) {
         details = {
           skipValidate: true,
@@ -103,7 +92,6 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
         this.rpcVersion = this.readSpecVersion() ?? (await this.getSpecVersion());
       }
 
-      // If cache isn't initialized, initialize it
       if (Object.keys(this.cacheClassHashes).length === 0) {
         if (!existsSync(cacheClassHashFilepath)) {
           mkdirSync(dirname(cacheClassHashFilepath), { recursive: true });
@@ -123,8 +111,6 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
         writeFileSync(cacheClassHashFilepath, JSON.stringify(this.cacheClassHashes, null, 2));
       }
 
-      // Populate the payload with the class hash
-      // If you don't restart devnet, and provide a wrong compiledClassHash, it will work
       payload.compiledClassHash = this.cacheClassHashes[cacheKey].compiledClassHash;
       payload.classHash = this.cacheClassHashes[cacheKey].classHash;
 
@@ -134,7 +120,7 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
         console.log(`\t${contractName} declared`);
       }
       this.declaredContracts[contractName] = class_hash;
-      this.abiCache[class_hash] = payload.contract.abi;
+      (this as unknown as { abiCache: Record<string, Abi> }).abiCache[class_hash] = payload.contract.abi;
       return class_hash;
     }
 
@@ -158,24 +144,6 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
       return await this.declareLocalContract(contractName, wait, artifactsFolder);
     }
 
-    async loadContract<T extends ContractLike = Contract>(
-      contractAddress: string,
-      classHash?: string,
-    ): Promise<ContractWithClassHash<T>> {
-      classHash ??= await this.getClassHashAt(contractAddress);
-      let abi = this.abiCache[classHash];
-      if (!abi) {
-        abi = (await this.getClassByHash(classHash)).abi;
-        this.abiCache[classHash] = abi;
-      }
-      return new Contract({
-        abi,
-        address: contractAddress,
-        providerOrAccount: this,
-        classHash,
-      }) as ContractWithClassHash<T>;
-    }
-
     async declareAndDeployContract<T extends ContractLike = Contract>(
       contractName: string,
       payload?: Omit<UniversalDeployerContractPayload, "classHash"> | UniversalDeployerContractPayload[],
@@ -183,34 +151,16 @@ export function WithContracts<T extends Constructor<RpcProvider & DevnetMixin>>(
     ): Promise<ContractWithClassHash<T>> {
       const classHash = await this.declareLocalContract(contractName, true, contractsFolder);
       const { contract_address } = await deployer.deployContract({ ...payload, classHash }, details);
-
-      // TODO could avoid network request and just create the contract using the ABI (remark from before creating this lib)
       return await this.loadContract<T>(contract_address, classHash);
     }
-  } as unknown as Constructor<InstanceType<T> & ContractsMixin>;
+  } as unknown as Constructor<InstanceType<T> & DeclareMixin>;
 }
 
-export type ContractLike = Contract | ContractWithPopulate<unknown>;
-
-export type ContractWithClassHash<T extends ContractLike = Contract> = T & { classHash: string };
-
-/**
- * Get all subfolders in a directory.
- * @param dirPath The directory path to search.
- * @returns An array of subfolder names.
- */
 function getSubfolders(dirPath: string): string[] {
   try {
-    // Resolve the directory path to an absolute path
     const absolutePath = resolve(dirPath);
-
-    // Read all items in the directory
     const items = readdirSync(absolutePath, { withFileTypes: true });
-
-    // Filter for directories and map to their names
-    const folders = items.filter((item) => item.isDirectory()).map((folder) => folder.name);
-
-    return folders;
+    return items.filter((item) => item.isDirectory()).map((folder) => folder.name);
   } catch (err) {
     throw new Error(`Error reading the directory at ${dirPath}`, { cause: err });
   }
@@ -223,7 +173,6 @@ function resolveContractFile(contractName: string, folder: string): string {
     return directPath;
   }
 
-  // Scan for prefixed files (e.g. "argent_AccountUpgradeable.contract_class.json" when contractName is "AccountUpgradeable")
   const target = `${contractName}${suffix}`;
   const prefixed = `_${contractName}${suffix}`;
   const absoluteDir = resolve(folder);
@@ -241,7 +190,6 @@ function resolveContractFile(contractName: string, folder: string): string {
   );
 }
 
-// This has to be fast. We don't care much about collisions
 async function hashFileFast(filePath: string): Promise<string> {
   const hash = createHash("md5");
   const stream = createReadStream(filePath);

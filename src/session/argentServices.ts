@@ -7,11 +7,11 @@ import type {
   TypedDataRevision,
 } from "starknet";
 import { typedData } from "starknet";
+import type { OutsideExecution } from "../accounts/outsideExecution.js";
+import { getTypedData } from "../accounts/outsideExecution.js";
 import { manager } from "../manager.js";
-import type { OutsideExecution } from "../outsideExecution.js";
-import { getTypedData } from "../outsideExecution.js";
+import { calculateTransactionHash } from "../provider/transactions.js";
 import type { EstimateStarknetKeyPair, StarknetKeyPair } from "../signers/signers.js";
-import { calculateTransactionHash } from "../transactions.js";
 import type { Session } from "./session.js";
 
 export class ArgentX {

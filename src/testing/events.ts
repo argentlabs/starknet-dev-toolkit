@@ -1,8 +1,7 @@
-import { assert, expect } from "chai";
 import { isEqual } from "lodash-es";
 import type { GetTransactionReceiptResponse, InvokeFunctionResponse, TransactionReceipt } from "starknet";
 import { hash, num } from "starknet";
-import { manager } from "./manager.js";
+import { manager } from "../manager.js";
 
 interface Event {
   from_address: string;
@@ -16,14 +15,18 @@ interface EventWithName extends Event {
 
 async function expectEventFromReceipt(receipt: TransactionReceipt, event: Event, eventName?: string) {
   receipt = await manager.ensureSuccess(receipt);
-  expect(event.keys?.length).to.be.greaterThan(0, "Unsupported: No keys");
+  const keyCount = event.keys?.length ?? 0;
+  if (keyCount <= 0) {
+    throw new Error("Unsupported: No keys");
+  }
   const events = receipt.events ?? [];
   const normalizedEvent = normalizeEvent(event);
   const matches = events.filter((e) => isEqual(normalizeEvent(e), normalizedEvent)).length;
   if (matches == 0) {
-    assert.fail(`No matches detected in this transaction: ${eventName}`);
-  } else if (matches > 1) {
-    assert.fail(`Multiple matches detected in this transaction: ${eventName}`);
+    throw new Error(`No matches detected in this transaction: ${eventName}`);
+  }
+  if (matches > 1) {
+    throw new Error(`Multiple matches detected in this transaction: ${eventName}`);
   }
 }
 

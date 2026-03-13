@@ -1,12 +1,12 @@
 import type { ArraySignatureType, BigNumberish, Call, InvocationsSignerDetails } from "starknet";
 import { CallData, TypedDataRevision, outsideExecution as outsideExecutionSnjs, typedData } from "starknet";
-import { ArgentAccount, getSignerDetails } from "../accounts.js";
+import { ArgentAccount, getSignerDetails } from "../accounts/accounts.js";
+import type { OutsideExecution } from "../accounts/outsideExecution.js";
+import { getTypedData } from "../accounts/outsideExecution.js";
 import { manager } from "../manager.js";
-import type { OutsideExecution } from "../outsideExecution.js";
-import { getTypedData } from "../outsideExecution.js";
+import { calculateTransactionHash } from "../provider/transactions.js";
 import type { StarknetKeyPair } from "../signers/signers.js";
 import { RawSigner, SignerType, randomStarknetKeyPair, signerTypeToCustomEnum } from "../signers/signers.js";
-import { calculateTransactionHash } from "../transactions.js";
 import type { BackendService } from "./argentServices.js";
 import type { AllowedMethod } from "./session.js";
 import { Session, SessionToken } from "./session.js";

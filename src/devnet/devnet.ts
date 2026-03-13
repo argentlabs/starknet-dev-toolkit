@@ -1,6 +1,6 @@
 import { Account, type AccountOptions, type ProviderInterface, type RpcProvider } from "starknet";
-import { generateRandomNumber } from "./random.js";
-import type { Constructor } from "./types.js";
+import type { Constructor } from "../types.js";
+import { generateRandomNumber } from "../utils/random.js";
 
 const dumpFolderPath = "./dump";
 export const devnetBaseUrl = "http://127.0.0.1:5050";
