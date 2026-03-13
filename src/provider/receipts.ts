@@ -1,7 +1,6 @@
-import { expect } from "chai";
 import type { GetTransactionReceiptResponse, RpcProvider, TransactionReceipt } from "starknet";
 import { TransactionExecutionStatus, TransactionFinalityStatus } from "starknet";
-import type { Constructor } from "./types.js";
+import type { Constructor } from "../types.js";
 
 const successStates = [TransactionFinalityStatus.ACCEPTED_ON_L1, TransactionFinalityStatus.ACCEPTED_ON_L2];
 
@@ -43,9 +42,9 @@ export function WithReceipts<T extends Constructor<RpcProvider>>(
     ): Promise<TransactionReceipt> {
       // There is an annoying bug... if the tx isn't successful, the promise will never resolve (fails w timeout)
       const tx = await this.ensureAccepted(execute);
-      expect(tx.execution_status, `Transaction failed: ${JSON.stringify(tx)}`).to.equal(
-        TransactionExecutionStatus.SUCCEEDED,
-      );
+      if (tx.execution_status !== TransactionExecutionStatus.SUCCEEDED) {
+        throw new Error(`Transaction failed: ${JSON.stringify(tx)}`);
+      }
       return tx;
     }
 

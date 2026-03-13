@@ -1,7 +1,6 @@
 import { concatBytes } from "@noble/curves/abstract/utils";
 import { p256 as secp256r1 } from "@noble/curves/p256";
-import type { BinaryLike } from "crypto";
-import { createHash } from "crypto";
+import { sha256 as nobleSha256 } from "@noble/hashes/sha256";
 import type { ArraySignatureType, BigNumberish, Uint256 } from "starknet";
 import { CairoCustomEnum, CallData, hash, shortString, uint256 } from "starknet";
 import { normalizeSecpR1Signature } from "./secp256.js";
@@ -253,8 +252,8 @@ export class EstimateLegacyWebauthnOwner extends EstimateWebauthnOwner {
   }
 }
 
-function sha256(message: BinaryLike) {
-  return createHash("sha256").update(message).digest();
+function sha256(message: Uint8Array | string): Uint8Array {
+  return nobleSha256(typeof message === "string" ? new TextEncoder().encode(message) : message);
 }
 
 export const randomWebauthnOwner = () => new WebauthnOwner(undefined, undefined, undefined);

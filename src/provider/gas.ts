@@ -1,15 +1,14 @@
 import { exec } from "child_process";
 import fs from "fs";
 import type { InvokeFunctionResponse } from "starknet";
-import { type Manager } from "./manager.js";
+import type { ReceiptsMixin } from "./receipts.js";
 
 const strkUsd = 0.06;
-// We could get the prices from the block, but it's not worth the extra complexity
 export const l1GasPrice = 45000000000000n;
 export const l2GasPrice = 8000000000n;
 export const l1DataGasPrice = 53000000000n;
 
-async function profileGasUsage(transactionHash: string, manager: Manager, allowFailedTransactions = false) {
+async function profileGasUsage(transactionHash: string, manager: ReceiptsMixin, allowFailedTransactions = false) {
   const receipt = await manager.ensureAccepted({ transaction_hash: transactionHash });
   if (!allowFailedTransactions) {
     await manager.ensureSuccess(receipt);
@@ -32,7 +31,7 @@ async function profileGasUsage(transactionHash: string, manager: Manager, allowF
 
 type Profile = Awaited<ReturnType<typeof profileGasUsage>>;
 
-export function newProfiler(manager: Manager) {
+export function newProfiler(manager: ReceiptsMixin) {
   const profiles: Record<string, Profile> = {};
 
   return {

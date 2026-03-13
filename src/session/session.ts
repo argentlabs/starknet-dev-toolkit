@@ -1,8 +1,8 @@
 import type { ArraySignatureType, CairoCustomEnum, Call, StarknetDomain, TypedData } from "starknet";
 import { CallData, TypedDataRevision, byteArray, hash, merkle, selector, shortString, typedData } from "starknet";
-import type { ArgentAccount } from "../accounts.js";
-import type { ArgentAccountContract } from "../contractTypes.js";
-import type { ContractLike } from "../contracts.js";
+import type { ArgentAccount } from "../accounts/accounts.js";
+import type { ArgentAccountContract } from "../contracts/contractTypes.js";
+import type { ContractLike } from "../contracts/loadContract.js";
 import { manager } from "../manager.js";
 import type { EstimateStarknetKeyPair, StarknetKeyPair } from "../signers/signers.js";
 import { randomStarknetKeyPair } from "../signers/signers.js";

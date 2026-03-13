@@ -1,6 +1,6 @@
 import type { BigNumberish, Call, OutsideCall, SignerInterface } from "starknet";
 import { CallData, typedData, TypedDataRevision } from "starknet";
-import { manager } from "./manager.js";
+import { manager } from "../manager.js";
 
 // TODO Using starknet-js's outsideExecution types and other fn we could reduce the code here (eg: OutsideExecutionTypesV2)
 const typesRev0 = {

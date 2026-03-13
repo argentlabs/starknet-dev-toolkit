@@ -1,7 +1,7 @@
 import type { StarknetDomain, TypedData } from "starknet";
 import { CairoCustomEnum, CallData, shortString, typedData, TypedDataRevision } from "starknet";
-import type { ArgentAccountContract } from "./contractTypes.js";
-import type { KeyPair } from "./signers/signers.js";
+import type { ArgentAccountContract } from "../contracts/contractTypes.js";
+import type { KeyPair } from "../signers/signers.js";
 
 export const ESCAPE_SECURITY_PERIOD = 7n * 24n * 60n * 60n; // 7 days
 export const ESCAPE_EXPIRY_PERIOD = 2n * 7n * 24n * 60n * 60n; // 14 days

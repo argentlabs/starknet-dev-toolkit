@@ -1,12 +1,15 @@
 import type { ProviderInterface, RpcProviderOptions } from "starknet";
 import { RpcProvider } from "starknet";
-import { WithContracts } from "./contracts.js";
-import { WithDevnet, devnetBaseUrl } from "./devnet.js";
+import { WithDeclare } from "./contracts/contractsDeclare.js";
+import { WithCachedContractLoader } from "./contracts/loadContract.js";
+import { WithDevnet, devnetBaseUrl } from "./devnet/devnet.js";
 import { getEnv } from "./env.js";
-import { WithReceipts } from "./receipts.js";
-import { TokenManager } from "./tokens.js";
+import { WithReceipts } from "./provider/receipts.js";
+import { TokenManager } from "./provider/tokens.js";
 
-export class Manager extends WithReceipts(WithContracts(WithDevnet(RpcProvider))) {
+const ManagerBase = WithDeclare(WithReceipts(WithCachedContractLoader(WithDevnet(RpcProvider))));
+
+export class Manager extends ManagerBase {
   tokens: TokenManager;
 
   constructor(options: RpcProviderOptions) {

@@ -1,14 +1,10 @@
 import type {
-  AccountOptions,
   AllowArray,
   ArraySignatureType,
   Call,
-  EstimateFeeBulk,
   EstimateFeeResponseOverhead,
-  Invocations,
   InvocationsSignerDetails,
   InvokeFunctionResponse,
-  Provider,
   RawCalldata,
   Signature,
   TransactionReceipt,
@@ -27,44 +23,19 @@ import {
   num,
   uint256,
 } from "starknet";
-import type { ArgentAccountContract } from "./contractTypes.js";
-import { getPredeployedDevnetAccount } from "./devnet.js";
-import { getEnv } from "./env.js";
-import { manager } from "./manager.js";
+import type { ArgentAccountContract } from "../contracts/contractTypes.js";
+import { getPredeployedDevnetAccount } from "../devnet/devnet.js";
+import { getEnv } from "../env.js";
+import { manager } from "../manager.js";
+import { strkAddress } from "../provider/tokens.js";
+import type { LegacyKeyPair } from "../signers/legacy.js";
+import { LegacyArgentSigner, LegacyMultisigSigner, LegacyStarknetKeyPair } from "../signers/legacy.js";
+import type { KeyPair } from "../signers/signers.js";
+import { ArgentSigner, RawSigner, randomStarknetKeyPair } from "../signers/signers.js";
+import { ArgentAccount } from "./argentAccount.js";
 import { getOutsideExecutionCall } from "./outsideExecution.js";
-import type { LegacyKeyPair } from "./signers/legacy.js";
-import { LegacyArgentSigner, LegacyMultisigSigner, LegacyStarknetKeyPair } from "./signers/legacy.js";
-import type { KeyPair } from "./signers/signers.js";
-import { ArgentSigner, RawSigner, randomStarknetKeyPair } from "./signers/signers.js";
-import { strkAddress } from "./tokens.js";
 
-export const ARGENT_ACCOUNT_CLASS_HASH_0_5_0 = "0x073414441639dcd11d1846f287650a00c60c416b9d3ba45d31c651672125b2c2";
-
-export class ArgentAccount extends Account {
-  constructor(options: AccountOptions) {
-    super(options);
-  }
-
-  override async estimateFeeBulk(invocations: Invocations, details?: UniversalDetails): Promise<EstimateFeeBulk> {
-    details = details ?? {};
-    details.skipValidate = details.skipValidate ?? false;
-
-    if (this.signer instanceof ArgentSigner) {
-      const { owner, guardian } = this.signer;
-      const estimateSigner = new ArgentSigner(owner.estimateSigner, guardian?.estimateSigner);
-      const estimateAccount = new Account({
-        provider: this as Provider,
-        address: this.address,
-        signer: estimateSigner,
-        cairoVersion: this.cairoVersion,
-        transactionVersion: this.transactionVersion,
-      });
-      return await estimateAccount.estimateFeeBulk(invocations, details);
-    } else {
-      return await super.estimateFeeBulk(invocations, details);
-    }
-  }
-}
+export { ARGENT_ACCOUNT_CLASS_HASH_0_5_0, ArgentAccount } from "./argentAccount.js";
 
 class ArgentWallet implements ArgentWallet {
   constructor(

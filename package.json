@@ -17,32 +17,8 @@
       "import": "./dist/browser.js"
     },
     "./ensure-devnet": {
-      "types": "./dist/ensureDevnet.d.ts",
-      "import": "./dist/ensureDevnet.js"
-    },
-    "./env": {
-      "types": "./dist/env.d.ts",
-      "import": "./dist/env.js"
-    },
-    "./devnet": {
-      "types": "./dist/devnet.d.ts",
-      "import": "./dist/devnet.js"
-    },
-    "./tokens": {
-      "types": "./dist/tokens.d.ts",
-      "import": "./dist/tokens.js"
-    },
-    "./signers/signers": {
-      "types": "./dist/signers/signers.d.ts",
-      "import": "./dist/signers/signers.js"
-    },
-    "./signers/secp256": {
-      "types": "./dist/signers/secp256.d.ts",
-      "import": "./dist/signers/secp256.js"
-    },
-    "./signers/webauthn": {
-      "types": "./dist/signers/webauthn.d.ts",
-      "import": "./dist/signers/webauthn.js"
+      "types": "./dist/devnet/ensureDevnet.d.ts",
+      "import": "./dist/devnet/ensureDevnet.js"
     },
     "./browser-shims/*": "./browser-shims/*.js"
   },
@@ -65,6 +41,7 @@
   },
   "dependencies": {
     "@noble/curves": "1.7.0",
+    "@noble/hashes": "1.6.0",
     "dotenv": "17.2.3",
     "ethers": "6.16.0",
     "lodash-es": "4.17.23"
@@ -88,5 +65,5 @@
     "typescript": "5.9.3",
     "typescript-eslint": "8.54.0"
   },
-  "packageManager": "pnpm@10.29.3"
+  "packageManager": "pnpm@10.29.3+sha512.498e1fb4cca5aa06c1dcf2611e6fafc50972ffe7189998c409e90de74566444298ffe43e6cd2acdc775ba1aa7cc5e092a8b7054c811ba8c5770f84693d33d2dc"
 }

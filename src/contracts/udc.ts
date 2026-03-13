@@ -1,6 +1,6 @@
 import type { RawCalldata, UniversalDeployerContractPayload } from "starknet";
 import { defaultDeployer } from "starknet";
-import { deployer } from "./accounts.js";
+import { deployer } from "../accounts/accounts.js";
 
 export async function deployContractUDC(
   classHash: string,
