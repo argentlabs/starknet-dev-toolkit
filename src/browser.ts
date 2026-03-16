@@ -4,7 +4,14 @@
  * barrel "." which eagerly evaluates manager.ts and accounts.ts.
  */
 
-import type { AccountOptions, EstimateFeeBulk, Invocations, Provider, ProviderInterface, UniversalDetails } from "starknet";
+import type {
+  AccountOptions,
+  EstimateFeeBulk,
+  Invocations,
+  Provider,
+  ProviderInterface,
+  UniversalDetails,
+} from "starknet";
 import { Account, Contract, RpcProvider } from "starknet";
 import { WithDevnet } from "./devnet.js";
 import { ArgentSigner } from "./signers/signers.js";
@@ -58,12 +65,12 @@ export class ArgentAccount extends Account {
   }
 }
 
-export { setEnvProvider } from "./env.js";
-export type { ToolkitEnv } from "./env.js";
 export { devnetBaseUrl, getPredeployedDevnetAccount, WithDevnet } from "./devnet.js";
 export type { DevnetMixin } from "./devnet.js";
-export { TokenManager, strkAddress } from "./tokens.js";
-export { ArgentSigner, KeyPair, SignerType, signerTypeToCustomEnum } from "./signers/signers.js";
-export type { NormalizedSecpSignature } from "./signers/secp256.js";
+export { setEnvProvider } from "./env.js";
+export type { ToolkitEnv } from "./env.js";
 export { normalizeSecpR1Signature } from "./signers/secp256.js";
+export type { NormalizedSecpSignature } from "./signers/secp256.js";
+export { ArgentSigner, KeyPair, SignerType, signerTypeToCustomEnum } from "./signers/signers.js";
 export { normalizeTransactionHash, toCharArray } from "./signers/webauthn.js";
+export { strkAddress, TokenManager } from "./tokens.js";
