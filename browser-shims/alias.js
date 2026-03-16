@@ -17,3 +17,23 @@ export function getNodeShimAliases() {
     child_process: path.resolve(__dirname, "child_process.js"),
   };
 }
+
+/**
+ * Returns a Vite `define` map that injects process.env and process.argv into the
+ * browser bundle at compile time. Reads RPC_URL, ADDRESS, PRIVATE_KEY from the
+ * Node process.env (loaded from .env by Vite/SvelteKit) and forwards CLI args.
+ *
+ *   import { getNodeShimAliases, getEnvDefines } from "starknet-dev-toolkit/browser-shims/alias";
+ *   export default defineConfig({
+ *     define: getEnvDefines(),
+ *     resolve: { alias: getNodeShimAliases() },
+ *   });
+ */
+export function getEnvDefines() {
+  return {
+    "process.env.RPC_URL": JSON.stringify(process.env.RPC_URL ?? ""),
+    "process.env.ADDRESS": JSON.stringify(process.env.ADDRESS ?? ""),
+    "process.env.PRIVATE_KEY": JSON.stringify(process.env.PRIVATE_KEY ?? ""),
+    "process.argv": JSON.stringify(process.argv.slice(2)),
+  };
+}

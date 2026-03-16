@@ -12,10 +12,6 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./browser": {
-      "types": "./dist/browser.d.ts",
-      "import": "./dist/browser.js"
-    },
     "./ensure-devnet": {
       "types": "./dist/ensureDevnet.d.ts",
       "import": "./dist/ensureDevnet.js"

@@ -26,8 +26,9 @@ export function setEnvProvider(provider: () => ToolkitEnv) {
 }
 
 /**
- * Returns current env. Uses the provider set via setEnvProvider; otherwise in Node reads from
- * process.env / process.argv; in browser returns devnet defaults.
+ * Returns current env. Uses the provider set via setEnvProvider; otherwise reads from
+ * process.env / process.argv. In browser, getEnvDefines() injects --allow-rpc-url-env
+ * into process.argv so the same check works in both environments.
  */
 export function getEnv(): ToolkitEnv {
   if (envProvider) {
@@ -35,7 +36,7 @@ export function getEnv(): ToolkitEnv {
   }
   if (typeof process !== "undefined" && process.env) {
     return {
-      nodeUrl: process.env.RPC_URL ?? devnetBaseUrl,
+      nodeUrl: process.env.RPC_URL || devnetBaseUrl,
       deployerAddress: process.env.ADDRESS,
       deployerPrivateKey: process.env.PRIVATE_KEY,
       allowRpcUrlEnv: process.argv?.includes?.("--allow-rpc-url-env") ?? false,

@@ -8,18 +8,24 @@ integration, and we do not provide support or encourage external adoption.
 
 ## Web / browser
 
-Not fully supported but some things might work. Call `setEnvProvider(() => ({ nodeUrl: "...", allowRpcUrlEnv: true, ... }))` before using the toolkit to override loading the secrets using dotenv.
+Not fully supported but some things might work. For Vite (and similar bundlers), use the two helpers from `browser-shims/alias`:
 
-For Vite (and similar bundlers), alias Node built-ins to the toolkit’s browser shims so the bundle resolves `fs`, `path`, `crypto`, `child_process`:
+- `getNodeShimAliases()` aliases Node built-ins (`fs`, `path`, `crypto`, `child_process`) to browser shims so the bundle compiles.
+- `getEnvDefines()` injects your env vars into the toolkit's `process.env` references at build time so `manager`/`deployer` initialize correctly.
 
 ```ts
-import { getNodeShimAliases } from "starknet-dev-toolkit/browser-shims/alias";
+import { getEnvDefines, getNodeShimAliases } from "starknet-dev-toolkit/browser-shims/alias";
 
 export default defineConfig({
+  define: getEnvDefines(),
   resolve: { alias: getNodeShimAliases() },
   // ...
 });
 ```
+
+Map your framework's env var names (e.g. SvelteKit's `PUBLIC_*`) to the toolkit's `RPC_URL`, `ADDRESS`, and `PRIVATE_KEY`. The config file runs in Node so `process.env` works there. Vite/SvelteKit loads `.env` before evaluating the config.
+
+For non-Vite setups you can still call `setEnvProvider(() => ({ nodeUrl: "...", allowRpcUrlEnv: true, ... }))` before importing modules that use `manager`/`deployer`.
 
 ## Consume the library
 
