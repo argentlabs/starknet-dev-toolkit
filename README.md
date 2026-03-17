@@ -46,13 +46,17 @@ git tag vX.Y.Z
 git push origin vX.Y.Z
 ```
 
-## Local development (linking)
+## Local development
 
-1. In the consumer repo, link to use the local checked out `starknet-dev-toolkit`:
+1. In the consumer's `package.json`, point to your local checkout using `file:`:
 
+```json
+"starknet-dev-toolkit": "file:../dev-toolkit"
 ```
-pnpm add --link ../starknet-dev-toolkit
-```
+
+Then run `pnpm install --no-frozen-lockfile`.
+
+Do **not** use `pnpm add --link`. With `link:`, pnpm creates a symlink and each project keeps its own `node_modules`, which causes duplicate module instances (e.g. `chai` gets loaded twice and plugins like `chai-as-promised` break). `file:` goes through pnpm's normal resolution so peer dependencies are deduplicated correctly.
 
 2. In this repo, run the watch build:
 
@@ -62,3 +66,5 @@ pnpm build:watch
 
 Changes compile into `dist/` within seconds. Source maps are emitted; enable
 sourcemaps in your runtime/bundler to debug into the original TypeScript.
+
+3. `file:` uses hard links, so edits to existing files in `dist/` are reflected automatically. If you add or delete files, re-run `pnpm install` in the consumer to pick them up.
