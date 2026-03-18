@@ -6,7 +6,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 /**
  * Returns a Vite (or similar) resolve.alias map so Node built-ins used by the toolkit
  * are resolved to these browser shims. Use in vite.config:
- *   import { getNodeShimAliases } from "starknet-dev-toolkit/browser-shims/alias";
+ *   import { getNodeShimAliases } from "starknet-dev-toolkit/browser-shims/vite";
  *   resolve: { alias: getNodeShimAliases() }
  */
 export function getNodeShimAliases() {
@@ -23,7 +23,7 @@ export function getNodeShimAliases() {
  * browser bundle at compile time. Reads RPC_URL, ADDRESS, PRIVATE_KEY from the
  * Node process.env (loaded from .env by Vite/SvelteKit) and forwards CLI args.
  *
- *   import { getNodeShimAliases, getEnvDefines } from "starknet-dev-toolkit/browser-shims/alias";
+ *   import { getNodeShimAliases, getEnvDefines } from "starknet-dev-toolkit/browser-shims/vite";
  *   export default defineConfig({
  *     define: getEnvDefines(),
  *     resolve: { alias: getNodeShimAliases() },

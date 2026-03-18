@@ -8,13 +8,13 @@ integration, and we do not provide support or encourage external adoption.
 
 ## Web / browser
 
-Not fully supported but some things might work. For Vite (and similar bundlers), use the two helpers from `browser-shims/alias`:
+Not fully supported but some things might work. For Vite (and similar bundlers), use the two helpers from `browser-shims/vite`:
 
 - `getNodeShimAliases()` aliases Node built-ins (`fs`, `path`, `crypto`, `child_process`) to browser shims so the bundle compiles.
 - `getEnvDefines()` injects your env vars into the toolkit's `process.env` references at build time so `manager`/`deployer` initialize correctly.
 
 ```ts
-import { getEnvDefines, getNodeShimAliases } from "starknet-dev-toolkit/browser-shims/alias";
+import { getEnvDefines, getNodeShimAliases } from "starknet-dev-toolkit/browser-shims/vite";
 
 export default defineConfig({
   define: getEnvDefines(),
