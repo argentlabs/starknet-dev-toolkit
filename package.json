@@ -16,30 +16,6 @@
       "types": "./dist/ensureDevnet.d.ts",
       "import": "./dist/ensureDevnet.js"
     },
-    "./env": {
-      "types": "./dist/env.d.ts",
-      "import": "./dist/env.js"
-    },
-    "./devnet": {
-      "types": "./dist/devnet.d.ts",
-      "import": "./dist/devnet.js"
-    },
-    "./tokens": {
-      "types": "./dist/tokens.d.ts",
-      "import": "./dist/tokens.js"
-    },
-    "./signers/signers": {
-      "types": "./dist/signers/signers.d.ts",
-      "import": "./dist/signers/signers.js"
-    },
-    "./signers/secp256": {
-      "types": "./dist/signers/secp256.d.ts",
-      "import": "./dist/signers/secp256.js"
-    },
-    "./signers/webauthn": {
-      "types": "./dist/signers/webauthn.d.ts",
-      "import": "./dist/signers/webauthn.js"
-    },
     "./browser-shims/*": "./browser-shims/*.js"
   },
   "main": "./dist/index.js",
@@ -60,14 +36,14 @@
     "prepare": "pnpm build"
   },
   "dependencies": {
-    "@noble/curves": "1.7.0",
-    "dotenv": "17.2.3",
-    "ethers": "6.16.0",
-    "lodash-es": "4.17.23"
+    "@noble/curves": "1.7.0"
   },
   "peerDependencies": {
     "chai": "5.1.1",
     "chai-as-promised": "8.0.2",
+    "dotenv": "17.2.3",
+    "lodash-es": "4.17.23",
+    "ethers": "6.16.0",
     "starknet": "9.2.1"
   },
   "devDependencies": {
