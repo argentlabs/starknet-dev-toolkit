@@ -29,7 +29,6 @@ import {
 } from "starknet";
 import type { ArgentAccountContract } from "./contractTypes.js";
 import { getPredeployedDevnetAccount } from "./devnet.js";
-import { getEnv } from "./env.js";
 import { manager } from "./manager.js";
 import { getOutsideExecutionCall } from "./outsideExecution.js";
 import type { LegacyKeyPair } from "./signers/legacy.js";
@@ -131,7 +130,8 @@ async function initDeployer(): Promise<Account> {
     console.log("Deployer:", account.address);
     return account;
   }
-  const { deployerAddress: address, deployerPrivateKey: privateKey } = getEnv();
+  const address = process.env.ADDRESS;
+  const privateKey = process.env.PRIVATE_KEY;
   if (!address || !privateKey) {
     throw new Error("Missing deployer credentials. Set ADDRESS/PRIVATE_KEY env vars.");
   }

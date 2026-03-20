@@ -13,7 +13,6 @@ export * from "./accounts.js";
 export * from "./contracts.js";
 export * from "./contractTypes.js";
 export * from "./devnet.js";
-export * from "./env.js";
 export * from "./events.js";
 export * from "./expectations.js";
 export * from "./files.js";
