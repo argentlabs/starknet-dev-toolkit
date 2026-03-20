@@ -48,7 +48,7 @@ git push origin vX.Y.Z
 
 ## Local development
 
-1. In the consumer's `package.json`, point to your local checkout using `file:`:
+1. In the consumer's `package.json`, point to your local checkout using `file:path-to-starknet-devnet-toolkit-folder`, for example:
 
 ```json
 "starknet-dev-toolkit": "file:../dev-toolkit"

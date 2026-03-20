@@ -22,7 +22,8 @@
   "types": "./dist/index.d.ts",
   "files": [
     "dist",
-    "browser-shims"
+    "browser-shims",
+    "src"
   ],
   "scripts": {
     "build": "tsc",
