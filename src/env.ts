@@ -15,25 +15,11 @@ export interface ToolkitEnv {
   allowRpcUrlEnv?: boolean;
 }
 
-let envProvider: (() => ToolkitEnv) | null = null;
-
 /**
- * Override how the toolkit gets env (e.g. in web: pass a function that returns your config).
- * Call this before using manager/deployer if you are not using the Node env provider.
- */
-export function setEnvProvider(provider: () => ToolkitEnv) {
-  envProvider = provider;
-}
-
-/**
- * Returns current env. Uses the provider set via setEnvProvider; otherwise reads from
- * process.env / process.argv. In browser, getEnvDefines() injects --allow-rpc-url-env
- * into process.argv so the same check works in both environments.
+ * Returns current env from process.env / process.argv. In browser, getEnvDefines()
+ * injects --allow-rpc-url-env into process.argv so the same check works in both environments.
  */
 export function getEnv(): ToolkitEnv {
-  if (envProvider) {
-    return envProvider();
-  }
   if (typeof process !== "undefined" && process.env) {
     return {
       nodeUrl: process.env.RPC_URL || devnetBaseUrl,

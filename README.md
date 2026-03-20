@@ -25,8 +25,6 @@ export default defineConfig({
 
 Map your framework's env var names (e.g. SvelteKit's `PUBLIC_*`) to the toolkit's `RPC_URL`, `ADDRESS`, and `PRIVATE_KEY`. The config file runs in Node so `process.env` works there. Vite/SvelteKit loads `.env` before evaluating the config.
 
-For non-Vite setups you can still call `setEnvProvider(() => ({ nodeUrl: "...", allowRpcUrlEnv: true, ... }))` before importing modules that use `manager`/`deployer`.
-
 ## Consume the library
 
 Install from a git tag (no registry):

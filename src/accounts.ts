@@ -134,7 +134,7 @@ async function initDeployer(): Promise<Account> {
   const { deployerAddress: address, deployerPrivateKey: privateKey } = getEnv();
   if (!address || !privateKey) {
     throw new Error(
-      "Missing deployer credentials. Set deployerAddress/deployerPrivateKey via setEnvProvider, or ADDRESS/PRIVATE_KEY in Node.",
+      "Missing deployer credentials. Set ADDRESS/PRIVATE_KEY env vars.",
     );
   }
   const account = new Account({
