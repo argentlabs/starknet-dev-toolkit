@@ -7,12 +7,12 @@ import { devnetBaseUrl } from "./devnet.js";
 export interface ToolkitEnv {
   /** RPC node URL (e.g. devnet or a remote RPC). */
   nodeUrl: string;
+  /** If true, allow using a custom RPC URL without passing --allow-rpc-url-env. */
+  allowRpcUrlEnv: boolean;
   /** Deployer address (for non-devnet). Omit to use devnet predeployed account. */
   deployerAddress?: string;
   /** Deployer private key (for non-devnet). */
   deployerPrivateKey?: string;
-  /** If true, allow using a custom RPC URL without passing --allow-rpc-url-env. */
-  allowRpcUrlEnv?: boolean;
 }
 
 /**
@@ -23,9 +23,9 @@ export function getEnv(): ToolkitEnv {
   if (typeof process !== "undefined" && process.env) {
     return {
       nodeUrl: process.env.RPC_URL || devnetBaseUrl,
+      allowRpcUrlEnv: process.argv?.includes?.("--allow-rpc-url-env") ?? false,
       deployerAddress: process.env.ADDRESS,
       deployerPrivateKey: process.env.PRIVATE_KEY,
-      allowRpcUrlEnv: process.argv?.includes?.("--allow-rpc-url-env") ?? false,
     };
   }
   return {
