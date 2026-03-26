@@ -1,0 +1,13 @@
+cairo
+venv
+target
+deployments/artifacts
+dist
+.github
+tests-integration/fixtures
+starknet-devnet-rs
+.svelte-kit
+docs
+pnpm-lock.yaml
+# Uses his own prettier config
+examples
