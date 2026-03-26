@@ -1,6 +1,6 @@
 {
   "name": "starknet-dev-toolkit",
-  "version": "unused-github-only",
+  "version": "0.0.0-unused-github-only",
   "type": "module",
   "engines": {
     "node": "24.x",
